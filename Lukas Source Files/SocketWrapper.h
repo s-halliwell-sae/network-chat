@@ -45,9 +45,6 @@ private:
 
 
 	bool Bind();
-
-
-
 };
 
 
