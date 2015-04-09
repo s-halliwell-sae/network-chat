@@ -22,14 +22,8 @@ public:
 	void Update();
 	void SendAck();
 
-//	void SendPacket(unsigned int sizeOfPacket);
-
 	void SetAddress(){};
 	void GetAddress(){};
-
-	// SetPort is being defined elsewhere, we might not need port however.
-//	void SetPort();
-//	void GetPort();
 
 	uint GetNumPacketsSent(){};
 	uint GetNumAcksReceived(){};
