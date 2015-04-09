@@ -15,7 +15,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Pending.cpp" />
+    <ClCompile Include="Room.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
+    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABPacket.h" />
@@ -24,8 +26,10 @@
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Packets.h" />
     <ClInclude Include="Pending.h" />
+    <ClInclude Include="Room.h" />
     <ClInclude Include="ServerInfo.h" />
     <ClInclude Include="SocketWrapper.h" />
+    <ClInclude Include="User.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EC8FE84-A4A4-41F7-9ACC-9214952663DE}</ProjectGuid>
