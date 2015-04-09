@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBE.cpp" />
     <ClCompile Include="IPAddress.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
@@ -23,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABPacket.h" />
+    <ClInclude Include="CBE.h" />
     <ClInclude Include="IPAddress.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="PacketHandler.h" />

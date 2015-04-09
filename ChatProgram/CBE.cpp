@@ -26,37 +26,42 @@ void CBE::AppendColour(std::string *msg)
 
 void CBE::BroadcastForServers()
 {
-	
+	//PacketHandler?
 }
 
 void CBE::SendExit()
 {
-	//PacketHandler do the thing
+	//PacketHandler?
 }
 
 void CBE::ExitServer()
 {
-
+	//PacketHandler?
 }
 
 bool CBE::IsServerDown()
 {
-
+	//PacketHandler?
 }
 
-void CBE::RequestRoomChange()
+void CBE::RequestRoomChange(std::string roomName)
 {
-
+	//PacketHandler?
 }
 
-void CBE::SendCreateRoom()
+void CBE::SendCreateRoom(std::string roomName)
 {
-	
+	//PacketHandler?
 }
 
-void CBE::SendSetName()
+void CBE::SendCreateRoom(std::string roomName, std::string password)
 {
+	//PacketHandler?
+}
 
+void CBE::SendSetName(std::string newName)
+{
+	//PacketHandler?
 }
 
 void CBE::UpdateRooms(std::vector<std::string> rooms)
