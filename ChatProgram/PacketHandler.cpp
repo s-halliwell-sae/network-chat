@@ -2,20 +2,12 @@
 #include "SocketWrapper.h"
 
 
-<<<<<<< HEAD
-PacketHander::PacketHander(SocketWrapper* sock)
-=======
-PacketHandler::PacketHandler(SocketWrapper sock) : mSocket(sock)
->>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
+PacketHandler::PacketHandler(SocketWrapper* sock)
 {
 	mSocket = sock;
 }
-<<<<<<< HEAD
-PacketHander::~PacketHander()
-=======
 
 PacketHandler::~PacketHandler()
->>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
 {
 
 }
@@ -29,16 +21,16 @@ void PacketHandler::SendAck()
 
 }
 
-uint PacketHander::GetNumPacketsSent()
+uint PacketHandler::GetNumPacketsSent()
 {
 	return mNumPacketsSent;
 }
-uint PacketHander::GetNumAcksReceived()
+uint PacketHandler::GetNumAcksReceived()
 {
 	return mNumAcksReceived;
 }
 
-void PacketHander::SetSocket(SocketWrapper* sock)
+void PacketHandler::SetSocket(SocketWrapper* sock)
 {
 	mSocket = sock;
 }

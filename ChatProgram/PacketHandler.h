@@ -15,37 +15,29 @@ class PacketHandler
 {
 public:
 	// ctor
-<<<<<<< HEAD
-	PacketHander(SocketWrapper* sock);
-	PacketHander();
-=======
-	PacketHandler(SocketWrapper sock);
->>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
+	PacketHandler(SocketWrapper* sock);
+	PacketHandler();
 	// dtor
 	~PacketHandler();
 
+	// Update function, to be called every update...
 	void Update();
+	// Send an acknowledge to the sender of processed packet
 	void SendAck();
 
-	void SetAddress(){};
-	void GetAddress(){};
-
+	// Get data about how many packets have been sent and received
 	uint GetNumPacketsSent();
 	uint GetNumAcksReceived();
 
+	// Set the socket to be used
 	void SetSocket(SocketWrapper* sock);
-
-
 private:
 	#pragma region PacketFunctions
 	std::function<void(uint)> fSendPacket;
+
 	#pragma endregion PacketFunctions
 
 	SocketWrapper* mSocket;
-
-//	ULONG mSendAddress;
-//	u_short mPort;	// Probably don't need to worry about the port here
-					// Socket handles it.
 
 	// Current packet number (loop around)
 	short mPacketNumber = 0;

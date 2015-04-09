@@ -15,7 +15,7 @@ SocketWrapper::SocketWrapper()
 SocketWrapper::SocketWrapper(IPAddress addr, unsigned short port)
 {
 	mPort = port;
-	mIPAddress = addr.GetIPAddress;
+	mIPAddress = addr.GetIPAddress();
 	Init();
 }
 // dtor
@@ -72,37 +72,44 @@ void SocketWrapper::Close()
 
 void SocketWrapper::Recieve()
 {
-	char buf[BUFFER_SIZE];
-
-	if (recvfrom(mSocket, buf, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
+	if (recvfrom(mSocket, mBuffer, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
 	{
+		// If there's an error print it (we'll probably also want to log it)
 		std::cout << "recvfrom() failed: Error " << WSAGetLastError() << std::endl;
 	}
 }
 void SocketWrapper::Send(struct sockaddr_in address, char* packet)
 {
-
+	// Send the packet
+	if (sendto(mSocket, packet, strlen(packet), 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
+	{
+		// If there's an error print it (we'll probably also want to log it)
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+	}
 }
 
 void SocketWrapper::PushData()
 {
-
+	// Push data to the PacketHandler
 }
 bool SocketWrapper::CheckForWaitingData()
 {
 	fd_set mCheckSockets;
-
 	mCheckSockets.fd_count = 1;
 	mCheckSockets.fd_array[0] = mSocket;
-
 	struct timeval t;
 	t.tv_sec = 0;
 	t.tv_usec = 0;
 
+	// If there is a packet, recvfrom it in the Recieve() function.
 	if (select(NULL, &mCheckSockets, NULL, NULL, &t) > 0)
 	{
+		// Recieve data
 		Recieve();
+		// Return true to inform that data has been received
+		return true;
 	}
+	// Return false to inform that data has not been received this update
 	return false;
 }
 void SocketWrapper::PopWaitingData()
