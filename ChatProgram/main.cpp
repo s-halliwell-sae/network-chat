@@ -1,5 +1,6 @@
 #include <iostream>
 #include "SocketWrapper.h"
+#include "IPAddress.h"
 int main()
 {
 	SocketWrapper socketWrapper("127.0.0.1", 1234);

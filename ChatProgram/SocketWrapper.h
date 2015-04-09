@@ -8,6 +8,7 @@
 #include <WS2tcpip.h>
 // \This is temporary
 
+class IPAddress;
 
 #include "PacketHandler.h"
 
@@ -16,7 +17,7 @@ class SocketWrapper
 public:
 	// ctors
 	SocketWrapper();
-	SocketWrapper(char* IPAddress, u_short port);
+	SocketWrapper(IPAddress addr, unsigned short port);
 	// dtor
 	~SocketWrapper();
 

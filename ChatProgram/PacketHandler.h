@@ -15,7 +15,8 @@ class PacketHander
 {
 public:
 	// ctor
-	PacketHander(SocketWrapper sock);
+	PacketHander(SocketWrapper* sock);
+	PacketHander();
 	// dtor
 	~PacketHander();
 
@@ -25,15 +26,18 @@ public:
 	void SetAddress(){};
 	void GetAddress(){};
 
-	uint GetNumPacketsSent(){};
-	uint GetNumAcksReceived(){};
+	uint GetNumPacketsSent();
+	uint GetNumAcksReceived();
+
+	void SetSocket(SocketWrapper* sock);
+
 
 private:
 	#pragma region PacketFunctions
 	std::function<void(uint)> fSendPacket;
 	#pragma endregion PacketFunctions
 
-	SocketWrapper& mSocket;
+	SocketWrapper* mSocket;
 
 //	ULONG mSendAddress;
 //	u_short mPort;	// Probably don't need to worry about the port here

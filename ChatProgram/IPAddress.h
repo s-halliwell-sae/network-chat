@@ -1,46 +1,25 @@
 #ifndef IP_ADDRESS_H
 #define IP_ADDRESS_H
 
-//#include <winsock2.h>
-//#include <MSWSock.h>
-#include <WS2tcpip.h>
-
 class IPAddress
 {
 public:
 	// ctors
-	IPAddress()
-	{
-		inet_pton(AF_INET, "127.0.0.1", &mIPAddress);
-	}
-	IPAddress(ULONG IPAddr)
-	{
-		mIPAddress = IPAddr;
-	}
-	IPAddress(const char * IPAddr)
-	{
-		inet_pton(AF_INET, IPAddr, &mIPAddress);
-	}
+	IPAddress();
+	IPAddress(unsigned long IPAddr);
+	IPAddress(const char * IPAddr);
 	// dtor
-	~IPAddress(){};
+	~IPAddress();
 
 	// setters
-	void SetAddress(const char * IPAddr)
-	{
-		mIPAddress = inet_pton(AF_INET, IPAddr, &mIPAddress);;
-	}
-	void SetAddress(ULONG IPAddr)
-	{
-		mIPAddress = IPAddr;
-	}
+	void SetAddress(const char * IPAddr);
+	void SetAddress(unsigned long IPAddr);
 
-	// getter
-	ULONG GetIPAddress()
-	{
-		return mIPAddress;
-	}
+	// getters
+	unsigned long GetIPAddress();
+	
 private:
-	ULONG mIPAddress;
+	unsigned long mIPAddress;
 };
 
 

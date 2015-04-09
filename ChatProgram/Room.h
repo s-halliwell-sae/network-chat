@@ -9,11 +9,12 @@ class Room
 public:
 	//ctors
 	Room(std::string roomName);
-	Room(std::string roomName/*, bCrypt password*/);
+//	Room(std::string roomName/*, bCrypt password*/);
 	Room(std::string roomName, bool indestructible);
-	Room(std::string roomName, bool indestructible/*, bCrypt password*/);
+//	Room(std::string roomName, bool indestructible/*, bCrypt password*/);
+
 	//dtor
-	~Room(){};
+	~Room();
 
 	void AddUser(User*);						//Add User to mUsers
 	void RemoveUser(std::string username);		//Remove User from mUsers

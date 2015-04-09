@@ -1,5 +1,8 @@
 #include "SocketWrapper.h"
 
+#include "IPAddress.h"
+
+#define BUFFER_SIZE 1024
 
 // ctor
 SocketWrapper::SocketWrapper()
@@ -9,10 +12,10 @@ SocketWrapper::SocketWrapper()
 }
 
 // ctor
-SocketWrapper::SocketWrapper(char* IPAddress, u_short port)
+SocketWrapper::SocketWrapper(IPAddress addr, unsigned short port)
 {
 	mPort = port;
-	inet_pton(AF_INET, IPAddress, &mIPAddress);
+	mIPAddress = addr.GetIPAddress;
 	Init();
 }
 // dtor
@@ -69,17 +72,11 @@ void SocketWrapper::Close()
 
 void SocketWrapper::Recieve()
 {
-	// debugging
-	char buf[512];
+	char buf[BUFFER_SIZE];
 
-	if (recvfrom(mSocket, buf, 512, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
+	if (recvfrom(mSocket, buf, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
 	{
 		std::cout << "recvfrom() failed: Error " << WSAGetLastError() << std::endl;
-	}
-	// debugging
-	if (buf != 0)
-	{
-		std::cout << buf;
 	}
 }
 void SocketWrapper::Send(struct sockaddr_in address, char* packet)

@@ -29,11 +29,14 @@ struct PacketChangeUserName : ABPacket
 {
 public:
 	PacketType mPacketType = PT_CHANGE_USER_NAME;
+	char newUsername[32];
+
 };
 struct PacketRoomList : ABPacket
 {
 public:
 	PacketType mPacketType = PT_ROOM_LIST;
+
 };
 struct PacketUserList : ABPacket
 {
