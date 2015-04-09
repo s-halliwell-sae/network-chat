@@ -17,6 +17,7 @@
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Pending.cpp" />
     <ClCompile Include="Room.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     <ClInclude Include="Packets.h" />
     <ClInclude Include="Pending.h" />
     <ClInclude Include="Room.h" />
+    <ClInclude Include="Server.h" />
     <ClInclude Include="ServerInfo.h" />
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="User.h" />

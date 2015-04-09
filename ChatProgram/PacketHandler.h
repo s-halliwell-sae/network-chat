@@ -11,14 +11,18 @@
 class SocketWrapper;
 using uint = unsigned int;
 
-class PacketHander
+class PacketHandler
 {
 public:
 	// ctor
+<<<<<<< HEAD
 	PacketHander(SocketWrapper* sock);
 	PacketHander();
+=======
+	PacketHandler(SocketWrapper sock);
+>>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
 	// dtor
-	~PacketHander();
+	~PacketHandler();
 
 	void Update();
 	void SendAck();

@@ -6,7 +6,7 @@ User::User(std::string name)
 {
 	mUsername = name;
 //	SocketWrapper sWrapper = SocketWrapper();
-//	mPacketHandler = PacketHander(sWrapper);
+//	mPacketHandler = PacketHandler(sWrapper);
 	
 }
 User::~User(){}

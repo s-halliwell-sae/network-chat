@@ -2,20 +2,29 @@
 #include "SocketWrapper.h"
 
 
+<<<<<<< HEAD
 PacketHander::PacketHander(SocketWrapper* sock)
+=======
+PacketHandler::PacketHandler(SocketWrapper sock) : mSocket(sock)
+>>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
 {
 	mSocket = sock;
 }
+<<<<<<< HEAD
 PacketHander::~PacketHander()
+=======
+
+PacketHandler::~PacketHandler()
+>>>>>>> 69e27d014b8c42f51f6cbd06948a4a56dd659121
 {
 
 }
 
-void PacketHander::Update()
+void PacketHandler::Update()
 {
 
 }
-void PacketHander::SendAck()
+void PacketHandler::SendAck()
 {
 
 }

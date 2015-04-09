@@ -11,6 +11,9 @@
     <ClCompile Include="IPAddress.cpp">
       <Filter>Variable Wrapper</Filter>
     </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABPacket.h" />
@@ -24,6 +27,9 @@
     <ClInclude Include="User.h" />
     <ClInclude Include="IPAddress.h">
       <Filter>Variable Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
