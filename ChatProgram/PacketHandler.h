@@ -11,13 +11,13 @@
 class SocketWrapper;
 using uint = unsigned int;
 
-class PacketHander
+class PacketHandler
 {
 public:
 	// ctor
-	PacketHander(SocketWrapper sock);
+	PacketHandler(SocketWrapper sock);
 	// dtor
-	~PacketHander();
+	~PacketHandler();
 
 	void Update();
 	void SendAck();

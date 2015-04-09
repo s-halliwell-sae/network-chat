@@ -13,7 +13,7 @@ public:
 	void SetName(std::string name);		//set mUsername
 private:
 	std::string mUsername;				//The name of the user
-	//PacketHander mPacketHandler;
+	//PacketHandler mPacketHandler;
 };
 
 #endif //USER_H
