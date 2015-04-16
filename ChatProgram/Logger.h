@@ -13,10 +13,13 @@
 
 //Doxygen documentaion stuff
 
+#include <string>
+
 class Logger
 {
 public:
 	static void Log(const char* fileName, int fileLine, const char* textIn, const int& warningLevel, const char* logTypeIn);
+	static void Log(const char* fileName, int fileLine, const std::string& textIn, const int& warningLevel, const char* logTypeIn);
 };
 
 #if MINIMUM_LOG_LEVEL >= DEFAULT_LOG_LEVEL

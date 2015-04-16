@@ -32,6 +32,11 @@ void Logger::Log(const char* fileName, int fileLine, const char* textIn, const i
 	ss.str("");
 }
 
+void Logger::Log(const char* fileName, int fileLine, const std::string& textIn, const int& warningLevel, const char* logTypeIn)
+{
+	Log(fileName, fileLine, textIn.c_str(), warningLevel, logTypeIn);
+}
+
 string FormatFileName(const char* fileNameIn)
 {
 	string shortName = fileNameIn;
