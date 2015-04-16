@@ -1,9 +1,13 @@
 #include "CBE.h"
 #include "User.h"
 #include <string>
+
 CBE::CBE()
 {
 	mServer = new User("WAITINGFORSERVER");
+	
+	auto fp = std::bind(&CBE::AppendColour, this);
+	parser.mFunctionMap.insert(std::make_pair("AppendColour", fp));
 };
 CBE::~CBE()
 {
@@ -12,7 +16,7 @@ CBE::~CBE()
 };
 
 //AppendColour(&mChatBox);
-void CBE::AppendColour(std::string *msg)
+void CBE::AppendColour(std::string &msg)
 {
 	std::string colour = "";
 	colour.append("[");
@@ -20,8 +24,7 @@ void CBE::AppendColour(std::string *msg)
 	colour.append("][");
 	colour.append(std::to_string(mCurFG));
 	colour.append("]");
-//	std::string oldMsg = *msg;
-	*msg = colour.append(*msg);
+	msg = colour.append(msg);
 }
 
 void CBE::BroadcastForServers()
@@ -42,6 +45,7 @@ void CBE::ExitServer()
 bool CBE::IsServerDown()
 {
 	//PacketHandler?
+	return false;
 }
 
 void CBE::RequestRoomChange(std::string roomName)

@@ -5,17 +5,18 @@
 #include <vector>
 #include "User.h"
 #include "ServerInfo.h"
+#include "ChatParser.h"
 
 class CBE
 {
 public:
-	CBE(){};
-	~CBE(){};
+	CBE();
+	~CBE();
 	
 	void BroadcastForServers();											//std::vector<Serverinfo>?
 	void SendExit();													//Send a message to the server telling it that you're disconnecting
 	void ExitServer();													//^?
-	void AppendColour(std::string *msg);								//Add the previosly used colours onto the start of the message
+	void AppendColour(std::string &msg);								//Add the previosly used colours onto the start of the message
 	void SendCreateRoom(std::string roomName);							//Send a create room request without a password
 	void SendCreateRoom(std::string roomName, std::string password);	//Send a create room request with a password
 	void SendSetName(std::string newName);								//Send a name change request
@@ -32,6 +33,8 @@ private:
 	std::vector<std::string> mUsers;		//A list of all the users connected to the current room
 	User* mServer;							//The server the client is connected to
 	std::vector<ServerInfo> mServersFound;	//A list of all the servers that respond to the broadcast
+
+	ChatParser parser;
 };
 
 #endif //CBE_H
