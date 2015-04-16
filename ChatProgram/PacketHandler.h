@@ -11,39 +11,33 @@
 class SocketWrapper;
 using uint = unsigned int;
 
-class PacketHander
+class PacketHandler
 {
 public:
 	// ctor
-	PacketHander(SocketWrapper sock);
+	PacketHandler(SocketWrapper* sock);
+	PacketHandler();
 	// dtor
-	~PacketHander();
+	~PacketHandler();
 
+	// Update function, to be called every update...
 	void Update();
+	// Send an acknowledge to the sender of processed packet
 	void SendAck();
 
-//	void SendPacket(unsigned int sizeOfPacket);
+	// Get data about how many packets have been sent and received
+	uint GetNumPacketsSent();
+	uint GetNumAcksReceived();
 
-	void SetAddress(){};
-	void GetAddress(){};
-
-	// SetPort is being defined elsewhere, we might not need port however.
-//	void SetPort();
-//	void GetPort();
-
-	uint GetNumPacketsSent(){};
-	uint GetNumAcksReceived(){};
-
+	// Set the socket to be used
+	void SetSocket(SocketWrapper* sock);
 private:
 	#pragma region PacketFunctions
 	std::function<void(uint)> fSendPacket;
+
 	#pragma endregion PacketFunctions
 
-	SocketWrapper& mSocket;
-
-//	ULONG mSendAddress;
-//	u_short mPort;	// Probably don't need to worry about the port here
-					// Socket handles it.
+	SocketWrapper* mSocket;
 
 	// Current packet number (loop around)
 	short mPacketNumber = 0;
