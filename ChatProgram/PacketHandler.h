@@ -49,7 +49,7 @@ private:
 	uint mNumAcksReceived = 0;
 
 	// A map of all of the packet receive callback functions.
-	std::map<std::vector<std::function<void(uint)>>, std::string> mPacketReceiveCallbacks;
+	std::map< std::string, std::vector<std::function<void(uint)>>> mPacketReceiveCallbacks;
 };
 
 #endif PACKET_HANDLER_H
