@@ -3,6 +3,9 @@
 
 #include <string>
 
+using u_short = unsigned short;
+using ULONG = unsigned long;
+
 struct ServerInfo
 {
 public:

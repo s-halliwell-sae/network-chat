@@ -11,28 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="IPAddress.cpp" />
+    <ClCompile Include="Encrypter.cpp" />
+    <ClCompile Include="IniManager.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MurmurHash3.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Pending.cpp" />
-    <ClCompile Include="Room.cpp" />
-    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
-    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABPacket.h" />
-    <ClInclude Include="IPAddress.h" />
+    <ClInclude Include="Encrypter.h" />
+    <ClInclude Include="IniManager.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="MurmurHash3.h" />
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Packets.h" />
     <ClInclude Include="Pending.h" />
-    <ClInclude Include="Room.h" />
-    <ClInclude Include="Server.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="ServerInfo.h" />
     <ClInclude Include="SocketWrapper.h" />
-    <ClInclude Include="User.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EC8FE84-A4A4-41F7-9ACC-9214952663DE}</ProjectGuid>
@@ -44,14 +43,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -77,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>CryptoPP</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -94,6 +94,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>CryptoPP</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

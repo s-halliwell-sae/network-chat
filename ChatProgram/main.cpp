@@ -14,12 +14,21 @@ int main()
 
 /*
 #include "Logger.h"
+#include "Encrypter.h"
 
 int main()
 {
-	LOG("Test log");
-	LOGWARN("Test warning");
-	LOGCUSTOM("Test custom", 1, "MyCustom");
+	Encrypter myCrypter;
+
+	LOG("Test");
+	std::string first = myCrypter.SaltedHash("Test");
+	std::string second = myCrypter.SaltedHash("Test");
+
+	if (first == second)
+	{
+		LOG("Same!");
+	}
+
 	while (1)
 	{
 		
