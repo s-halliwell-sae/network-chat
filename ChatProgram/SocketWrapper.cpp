@@ -2,11 +2,12 @@
 
 #include "IPAddress.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 1024 // note this is the maximum size of a packet before an error is thrown
 
 // ctor
 SocketWrapper::SocketWrapper()
 {
+	mPort = 1234;
 	mIPAddress = INADDR_ANY;
 	Init();
 }
@@ -34,7 +35,7 @@ void SocketWrapper::Init()
 	}
 	printf("Initialised Winsock.\n");
 
-	mSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (mSocket == SOCKET_ERROR)
 	{
 		printf("Opening socket failed with Error: %d", WSAGetLastError());
@@ -47,6 +48,8 @@ void SocketWrapper::Init()
 	BOOL bNewBehavior = FALSE;
 	WSAIoctl(mSocket, SIO_UDP_CONNRESET, &bNewBehavior, sizeof(bNewBehavior), NULL, 0, &dwBytesReturned, NULL, NULL);
 
+	memset((char *)&mSourceAddress, 0, sizeof(mSourceAddress));
+
 	//Prepare the sockaddr_in structure
 	mAddress.sin_family = AF_INET;
 	mAddress.sin_addr.s_addr = mIPAddress;
@@ -57,12 +60,15 @@ void SocketWrapper::Init()
 	{
 		printf("Binding done.\n");
 	}
-
 	mRecvLength = sizeof(mSourceAddress);
 }
 void SocketWrapper::Update()
 {
-	CheckForWaitingData();
+	if (CheckForWaitingData())
+	{
+		// Debugging
+		printf("Something was recieved \n");
+	}
 }
 void SocketWrapper::Close()
 {
@@ -72,26 +78,50 @@ void SocketWrapper::Close()
 
 void SocketWrapper::Recieve()
 {
-	if (recvfrom(mSocket, mBuffer, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
+	char buffer[BUFFER_SIZE];
+	memset(buffer, '\0', BUFFER_SIZE);
+	if (recvfrom(mSocket, buffer, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength) == SOCKET_ERROR)
 	{
 		// If there's an error print it (we'll probably also want to log it)
 		std::cout << "recvfrom() failed: Error " << WSAGetLastError() << std::endl;
 	}
 }
-void SocketWrapper::Send(struct sockaddr_in address, char* packet)
+void SocketWrapper::Send(IPAddress addr, ABPacket &packet)
 {
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = addr.GetIPAddress();
+	address.sin_port = htons(mPort);
+	// Send the packet
+	/*
+	if (sendto(mSocket, packet, sizeof(packet), 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
+	{
+		// If there's an error print it (we'll probably also want to log it)
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+	}*/
+}
+
+void SocketWrapper::Send(IPAddress addr, const char* packet)
+{
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = addr.GetIPAddress();
+	address.sin_port = htons(mPort);
+
 	// Send the packet
 	if (sendto(mSocket, packet, strlen(packet), 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
 	{
 		// If there's an error print it (we'll probably also want to log it)
 		printf("sendto() failed with error code : %d", WSAGetLastError());
 	}
+	printf("sent: %s %c", packet, '\n');
 }
 
 void SocketWrapper::PushData()
 {
 	// Push data to the PacketHandler
 }
+
 bool SocketWrapper::CheckForWaitingData()
 {
 	fd_set mCheckSockets;

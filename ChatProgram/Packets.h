@@ -1,6 +1,6 @@
 #ifndef PACKETS_H
 #define PACKETS_H
-
+#include <string.h>
 #include "ABPacket.h"
 // ABPacket holds the enum of PacketType
 
@@ -37,7 +37,15 @@ public:
 		mPacketType = PT_MESSAGE;
 	}
 	char userName[USER_NAME_SIZE];
+	void SetUserName(const char* name)
+	{
+		strcpy_s(userName, name);
+	}
 	char message[MESSAGE_SIZE];
+	void SetMessage(const char* msg)
+	{
+		strcpy_s(message, msg);
+	}
 };
 struct PacketDetectServer : ABPacket
 {

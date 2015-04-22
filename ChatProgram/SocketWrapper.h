@@ -31,8 +31,8 @@ public:
 	// Recieve data on the socket, decide what to do with that data
 	void Recieve();
 	// Send a packet to the address
-	void Send(struct sockaddr_in address, char* packet);
-
+	void Send(IPAddress addr, ABPacket &packet);
+	void Send(IPAddress addr, const char* packet);
 
 	void PushData();
 	bool CheckForWaitingData();

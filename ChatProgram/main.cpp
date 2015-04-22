@@ -1,10 +1,20 @@
 #include <iostream>
 #include "SocketWrapper.h"
+#include "Packets.h"
 #include "IPAddress.h"
 int main()
 {
-	SocketWrapper socketWrapper(IPAddress("127.0.0.1"), 1234);
+	IPAddress IP = IPAddress("192.168.1.109");
+	IPAddress sendIP = IPAddress("192.168.1.109");
+	SocketWrapper socketWrapper;
 
+	PacketMessage msg;
+	msg.SetMessage("MESSAGE");
+	msg.SetUserName("ASDF");
+	ABPacket* message = &msg;
+	
+
+	socketWrapper.Send(sendIP, msg.userName);
 	while (1)
 	{
 		socketWrapper.Update();
