@@ -1,22 +1,19 @@
 #ifndef CHATPARSER_H
 #define CHATPARSER_H
 
-#include <map>
-#include <functional>
+#include <string>
 
-typedef std::function<void(std::string&)> FunctionPointer;
-typedef std::map<std::string, FunctionPointer> function_map;
+#include "CommandManager.h"
 
 class ChatParser
 {
 public:
-	ChatParser(){};
-	~ChatParser(){};
+	ChatParser();
+	~ChatParser();
 	void Parse(std::string chatBox);
-	function_map mFunctionMap;
-	void call_function(const std::string& pFunction);
+	CommandManager* GetCommandManager();
 private:
-	
+	CommandManager mCommandManager;
 };
 
 #endif //CHATPARSER_H

@@ -7,24 +7,32 @@
 #include "ServerInfo.h"
 #include "ChatParser.h"
 
+#include "PacketHandler.h"
+#include "SocketWrapper.h"
+
+#include "IPAddress.h"
+
 class CBE
 {
 public:
 	CBE();
 	~CBE();
 	
-	void BroadcastForServers();											//std::vector<Serverinfo>?
-	void SendExit();													//Send a message to the server telling it that you're disconnecting
-	void ExitServer();													//^?
-	void AppendColour(std::string &msg);								//Add the previosly used colours onto the start of the message
-	void SendCreateRoom(std::string roomName);							//Send a create room request without a password
-	void SendCreateRoom(std::string roomName, std::string password);	//Send a create room request with a password
-	void SendSetName(std::string newName);								//Send a name change request
-	void RequestRoomChange(std::string roomName);						//Send a room change request
-	void UpdateRooms(std::vector<std::string> rooms);					//
-	bool IsServerDown();												//
-	void UpdateUsers(std::vector<std::string> users);					//
-	std::string mChatBox;												//The chatbox which will be directly modified through the gui
+	void BroadcastForServers();									//std::vector<Serverinfo>?
+	void SendExit();											//Send a message to the server telling it that you're disconnecting
+	void ExitServer();											//^?
+	void AppendColour(std::vector<std::string> &values);		//Add the previosly used colours onto the start of the message
+	void SendCreateRoom(std::vector<std::string> &values);		//Send a create room request without a password
+	void SendSetName(std::vector<std::string> &values);			//Send a name change request
+	void RequestRoomChange(std::vector<std::string> &values);	//Send a room change request
+	void SetRooms(std::vector<std::string> values);				//
+	bool IsServerDown();										//
+	void SetUsers(std::vector<std::string> users);				//
+	std::string mChatBox;										//The chatbox which will be directly modified through the gui
+
+	void Update();
+	void SetServersFound(std::vector<ServerInfo> serversFound);
+	void SetServerAddr(IPAddress addr);
 private:
 	std::string mCurrentRoom;				//The current room this client is connected to
 	int mCurFG;								//The most recent foreground colour used
@@ -35,6 +43,11 @@ private:
 	std::vector<ServerInfo> mServersFound;	//A list of all the servers that respond to the broadcast
 
 	ChatParser parser;
+
+	SocketWrapper mSocket;
+	PacketHandler mPacketHandler;
+
+	IPAddress mServerAddr;
 };
 
 #endif //CBE_H

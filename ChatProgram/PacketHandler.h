@@ -16,7 +16,7 @@ class PacketHandler
 public:
 	// ctor
 	PacketHandler(SocketWrapper* sock);
-	PacketHandler();
+	PacketHandler(){};
 	// dtor
 	~PacketHandler();
 

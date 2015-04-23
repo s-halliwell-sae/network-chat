@@ -2,6 +2,8 @@
 #include "SocketWrapper.h"
 #include "Packets.h"
 #include "IPAddress.h"
+
+//#include "CBE.h"
 int main()
 {
 	IPAddress IP = IPAddress("127.0.0.1");
@@ -17,9 +19,13 @@ int main()
 	sock.SetHandler(&handler);
 
 	sock.Send(sendIP, message, sizeof(PacketMessage));
+
+//	CBE mCBE = CBE();
+
 	while (1)
 	{
 		sock.Update();
+//		mCBE.Update();
 	}
 	return 0;
 }

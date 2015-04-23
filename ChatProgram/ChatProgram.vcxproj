@@ -11,6 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBE.cpp" />
+    <ClCompile Include="ChatParser.cpp" />
+    <ClCompile Include="CommandManager.cpp" />
     <ClCompile Include="Encrypter.cpp" />
     <ClCompile Include="IniManager.cpp" />
     <ClCompile Include="IPAddress.cpp" />
@@ -26,6 +29,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ABPacket.h" />
+    <ClInclude Include="CBE.h" />
+    <ClInclude Include="ChatParser.h" />
+    <ClInclude Include="CommandManager.h" />
     <ClInclude Include="Encrypter.h" />
     <ClInclude Include="IniManager.h" />
     <ClInclude Include="IPAddress.h" />
