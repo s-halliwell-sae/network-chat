@@ -11,6 +11,8 @@
 #define MAX_NUM_ROOMS 256
 #define MAX_USERS_PER_ROOM 256
 
+#pragma pack (push, 1)
+
 #pragma region Shared packets
 // Shared Packets
 struct PacketAcknowledge : ABPacket
@@ -101,7 +103,7 @@ struct PacketCreateRoomResponse : ABPacket
 public:
 	PacketCreateRoomResponse()
 	{
-		mPacketType = PT_CREATE_ROOM_RESPONCE;
+		mPacketType = PT_CREATE_ROOM;
 	}
 	bool wasCreated;
 };
@@ -110,7 +112,7 @@ struct ConnectToServerResponce : ABPacket
 public:
 	ConnectToServerResponce()
 	{
-		mPacketType = PT_CONNECT_TO_SERVER_RESPONCE;
+		mPacketType = PT_CONNECT_TO_SERVER;
 	}
 	bool isAccepted;
 };
@@ -159,4 +161,6 @@ public:
 };
 #pragma endregion
 
-#endif PACKETS_H
+#pragma pack (pop)
+
+#endif//PACKETS_H

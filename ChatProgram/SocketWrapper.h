@@ -31,18 +31,22 @@ public:
 	// Recieve data on the socket, decide what to do with that data
 	void Recieve();
 	// Send a packet to the address
-	void Send(IPAddress addr, ABPacket &packet);
+	void Send(IPAddress addr, ABPacket *packet, size_t size);
 	void Send(IPAddress addr, const char* packet);
 
-	void PushData();
+	void SetHandler(PacketHandler* handler);
+
 	bool CheckForWaitingData();
+	void SendToHandler();
 	void PopWaitingData();
 
-	void SendToHandler();
 
 private:
 	// The buffer to temporarily hold data before sending it to a handler
 	char* mBuffer;
+	ABPacket* mLatestPacket;
+
+	PacketHandler* mHandler;
 
 	// Data that is relevant to the WINSOCK socket setup process and dealing with
 	// incoming and outgoing packets

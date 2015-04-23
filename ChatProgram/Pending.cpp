@@ -36,11 +36,11 @@ uint Pending::GetAttempts()
 	return mAttempts;
 }
 
-void Pending::SetPacket(ABPacket packet)
+void Pending::SetPacket(ABPacket* packet)
 {
 	mPacket = packet;
 }
-ABPacket Pending::GetPacket()
+ABPacket* Pending::GetPacket()
 {
 	return mPacket;
 }

@@ -31,13 +31,36 @@ public:
 
 	// Set the socket to be used
 	void SetSocket(SocketWrapper* sock);
+
+	void PushPacket(ABPacket* pack);
+
 private:
 	#pragma region PacketFunctions
-	std::function<void(uint)> fSendPacket;
+	void Acknowledge();
+	void Heartbeat();
+	void Message();
+	void DetectServer();
+
+	void ChangeRoom();
+	void ChangeRoomRequest();
+
+	void ChangeUsername();
+	void ChangeUsernameRequest();
+	
+	void GetUserList();
+	void GetRoomList();
+
+	void CreateRoom();
+	void CreateRoomRequest();
+
+	void ConnectToserver();
+	void ConnectToserverRequest();
 
 	#pragma endregion PacketFunctions
 
 	SocketWrapper* mSocket;
+
+	ABPacket* mCurrentPacket;
 
 	// Current packet number (loop around)
 	short mPacketNumber = 0;
@@ -49,7 +72,7 @@ private:
 	uint mNumAcksReceived = 0;
 
 	// A map of all of the packet receive callback functions.
-	std::map< std::string, std::vector<std::function<void(uint)>>> mPacketReceiveCallbacks;
+	std::map< std::string, std::function<void(uint)>> mPacketReceiveCallbacks;
 };
 
 #endif PACKET_HANDLER_H

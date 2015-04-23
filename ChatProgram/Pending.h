@@ -21,13 +21,13 @@ public:
 	void SetTimeStamp(time_t time);
 	void SetPacketNumber(uint num);
 	//	void SetAttempts(uint num);
-	void SetPacket(ABPacket packet);
+	void SetPacket(ABPacket* packet);
 	#pragma endregion Setters
 
 	#pragma region Getters
 	time_t GetTimeStamp();
 	uint GetPacketNumber();
-	ABPacket GetPacket();
+	ABPacket* GetPacket();
 	uint GetAttempts();
 	#pragma endregion Getters
 	
@@ -38,7 +38,7 @@ private:
 	time_t mTimeStamp;
 	uint mPacketNumber;
 	uint mAttempts;
-	ABPacket mPacket;
+	ABPacket* mPacket;
 };
 
 #endif PENDING_H

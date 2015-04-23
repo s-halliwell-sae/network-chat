@@ -4,20 +4,22 @@
 #include "IPAddress.h"
 int main()
 {
-	IPAddress IP = IPAddress("192.168.1.109");
-	IPAddress sendIP = IPAddress("192.168.1.109");
-	SocketWrapper socketWrapper;
+	IPAddress IP = IPAddress("127.0.0.1");
+	IPAddress sendIP = IPAddress("127.0.0.1");
+	SocketWrapper sock;
 
 	PacketMessage msg;
 	msg.SetMessage("MESSAGE");
 	msg.SetUserName("ASDF");
 	ABPacket* message = &msg;
 	
+	PacketHandler handler(&sock);
+	sock.SetHandler(&handler);
 
-	socketWrapper.Send(sendIP, msg.userName);
+	sock.Send(sendIP, message, sizeof(PacketMessage));
 	while (1)
 	{
-		socketWrapper.Update();
+		sock.Update();
 	}
 	return 0;
 }
