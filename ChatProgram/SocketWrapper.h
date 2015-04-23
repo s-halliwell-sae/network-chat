@@ -33,6 +33,8 @@ public:
 	// Send a packet to the address
 	void Send(IPAddress addr, ABPacket *packet, size_t size);
 	void Send(IPAddress addr, const char* packet);
+	// Broadcast to find servers
+	void Broadcast();
 
 	void SetHandler(PacketHandler* handler);
 

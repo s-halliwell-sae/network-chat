@@ -9,14 +9,14 @@ int main()
 	SocketWrapper sock;
 
 	PacketMessage msg;
-	msg.SetMessage("MESSAGE");
+	msg.SetMessage("This is a message from ASDF.");
 	msg.SetUserName("ASDF");
 	ABPacket* message = &msg;
 	
 	PacketHandler handler(&sock);
-	sock.SetHandler(&handler);
 
-	sock.Send(sendIP, message, sizeof(PacketMessage));
+//	sock.Send(sendIP, message, sizeof(PacketMessage));
+	sock.Broadcast();
 	while (1)
 	{
 		sock.Update();
