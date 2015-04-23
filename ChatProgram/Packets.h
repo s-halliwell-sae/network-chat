@@ -54,7 +54,7 @@ struct PacketDetectServer : ABPacket
 public:
 	PacketDetectServer()
 	{
-		PacketType mPacketType = PT_DETECT_SERVER;
+		mPacketType = PT_DETECT_SERVER;
 	}
 };
 #pragma endregion

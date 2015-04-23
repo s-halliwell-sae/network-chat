@@ -43,10 +43,18 @@ void SocketWrapper::Init()
 	}
 	printf("Socket Created.\n");
 
+
 	//Fix a bug with windows
 	DWORD dwBytesReturned = 0;
 	BOOL bNewBehavior = FALSE;
 	WSAIoctl(mSocket, SIO_UDP_CONNRESET, &bNewBehavior, sizeof(bNewBehavior), NULL, 0, &dwBytesReturned, NULL, NULL);
+
+	BOOL bOptVal = TRUE;
+	setsockopt(mSocket,
+		SOL_SOCKET,
+		SO_BROADCAST,
+		(const char *)&bOptVal,
+		sizeof(BOOL));
 
 	memset((char *)&mSourceAddress, 0, sizeof(mSourceAddress));
 
@@ -101,7 +109,6 @@ void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 	memset(buffer, '\0', size);
 
 	memcpy(buffer, packet, size);
-//	std::cout << buffer;
 
 	// Send the packet
 	if (sendto(mSocket, buffer, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
@@ -125,6 +132,26 @@ void SocketWrapper::Send(IPAddress addr, const char* packet)
 		printf("sendto() failed with error code : %d", WSAGetLastError());
 	}
 	printf("sent: %s %c", packet, '\n');
+}
+
+void SocketWrapper::Broadcast()
+{
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = IPAddress("255.255.255.255").GetIPAddress();
+	address.sin_port = htons(mPort);
+
+	PacketDetectServer* pds = new PacketDetectServer();
+
+	ABPacket* packet = (ABPacket*)pds;
+
+	size_t size = sizeof(PacketDetectServer);
+
+	if (sendto(mSocket, (const char*)packet, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
+	{
+		// If there's an error print it (we'll probably also want to log it)
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+	}
 }
 
 void SocketWrapper::SetHandler(PacketHandler* handler)
