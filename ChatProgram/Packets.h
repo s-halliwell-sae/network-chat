@@ -7,6 +7,7 @@
 #define MESSAGE_SIZE 1024
 #define USER_NAME_SIZE 32
 #define ROOM_NAME_SIZE 32
+#define PASSWORD_SIZE 32
 
 #define MAX_NUM_ROOMS 256
 #define MAX_USERS_PER_ROOM 256
@@ -128,6 +129,7 @@ public:
 		mPacketType = PT_CHANGE_ROOM_REQUEST;
 	}
 	char newRoomName[ROOM_NAME_SIZE];
+	char roomPassword[PASSWORD_SIZE];
 };
 struct PacketChangeUserNameRequest : ABPacket
 {
@@ -147,6 +149,7 @@ public:
 		mPacketType = PT_CREATE_ROOM_REQUEST;
 	}
 	char newRoomName[ROOM_NAME_SIZE];
+	char roomPassword[PASSWORD_SIZE];
 };
 
 struct ConnectToServerRequest : ABPacket

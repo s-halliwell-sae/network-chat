@@ -19,7 +19,7 @@ CBE::CBE()
 	parser.GetCommandManager()->AddFunction("AppendColour", fp);
 
 
-	mSocket = SocketWrapper();
+//	mSocket = SocketWrapper;
 	mPacketHandler = PacketHandler(&mSocket);
 
 	SetServerAddr(IPAddress("127.0.0.1"));

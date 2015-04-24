@@ -16,7 +16,7 @@ class PacketHandler
 public:
 	// ctor
 	PacketHandler(SocketWrapper* sock);
-	PacketHandler(){};
+	PacketHandler();
 	// dtor
 	~PacketHandler();
 
@@ -25,20 +25,17 @@ public:
 	// Send an acknowledge to the sender of processed packet
 	void SendAck();
 
-	// Get data about how many packets have been sent and received
-	uint GetNumPacketsSent();
-	uint GetNumAcksReceived();
-
 	// Set the socket to be used
 	void SetSocket(SocketWrapper* sock);
 
 	void PushPacket(ABPacket* pack);
 
 private:
-	#pragma region PacketFunctions
+	#pragma region Packet Functions
 	void Acknowledge();
 	void Heartbeat();
-	void Message();
+	void CMessage();
+	void SMessage();
 	void DetectServer();
 
 	void ChangeRoom();
@@ -47,8 +44,8 @@ private:
 	void ChangeUsername();
 	void ChangeUsernameRequest();
 	
-	void GetUserList();
-	void GetRoomList();
+	void UserList();
+	void RoomList();
 
 	void CreateRoom();
 	void CreateRoomRequest();
@@ -56,12 +53,13 @@ private:
 	void ConnectToserver();
 	void ConnectToserverRequest();
 
-	#pragma endregion PacketFunctions
+	#pragma endregion
 
 	SocketWrapper* mSocket;
 
 	ABPacket* mCurrentPacket;
 
+	#pragma region MOVE TO USER AND UNCOMMENT
 	// Current packet number (loop around)
 	short mPacketNumber = 0;
 	// Queue of packets that are awaiting an acknowledge
@@ -70,9 +68,10 @@ private:
 	// Used for calculating packet loss
 	uint mNumPacketsSent = 0;
 	uint mNumAcksReceived = 0;
+	#pragma endregion
 
 	// A map of all of the packet receive callback functions.
-	std::map< std::string, std::function<void(uint)>> mPacketReceiveCallbacks;
+	std::map<PacketType, std::function<void()>> mPacketReceiveCallbacks;
 };
 
 #endif PACKET_HANDLER_H

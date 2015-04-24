@@ -17,22 +17,18 @@ int main()
 	
 	PacketHandler handler(&sock);
 
-<<<<<<< HEAD
 	sock.Send(sendIP, message, sizeof(PacketMessage));
 
-//	CBE mCBE = CBE();
-
-=======
-//	sock.Send(sendIP, message, sizeof(PacketMessage));
 	sock.Broadcast();
->>>>>>> origin/master
 	while (1)
 	{
 		sock.Update();
-//		mCBE.Update();
 	}
 	return 0;
+
+	ABPacket* pack;
 }
+
 
 /*
 #include "Logger.h"
@@ -58,3 +54,4 @@ int main()
 	return 0;
 }
 */
+
