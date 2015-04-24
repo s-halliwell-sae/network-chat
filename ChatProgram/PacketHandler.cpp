@@ -9,9 +9,9 @@ PacketHandler::PacketHandler(SocketWrapper* sock)
 	mSocket->SetHandler(this);
 }
 
-PacketHandler::PacketHandler()
-{
-}
+//PacketHandler::PacketHandler()
+//{
+//}
 
 PacketHandler::~PacketHandler()
 {
