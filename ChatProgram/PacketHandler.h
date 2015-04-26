@@ -16,7 +16,7 @@ class PacketHandler
 public:
 	// ctor
 	PacketHandler(SocketWrapper* sock);
-	PacketHandler(){};
+	PacketHandler();
 	// dtor
 	~PacketHandler();
 
@@ -34,12 +34,18 @@ public:
 
 	void PushPacket(ABPacket* pack);
 
+	void AssignAsClient();
+	void AssignAsServer();
 private:
 	#pragma region PacketFunctions
 	void Acknowledge();
 	void Heartbeat();
-	void Message();
+	
+	void CMessage();
+	void SMessage();
+	
 	void DetectServer();
+	void ServerInfo();
 
 	void ChangeRoom();
 	void ChangeRoomRequest();
@@ -47,8 +53,8 @@ private:
 	void ChangeUsername();
 	void ChangeUsernameRequest();
 	
-	void GetUserList();
-	void GetRoomList();
+	void UserList();
+	void RoomList();
 
 	void CreateRoom();
 	void CreateRoomRequest();
@@ -56,7 +62,7 @@ private:
 	void ConnectToserver();
 	void ConnectToserverRequest();
 
-	#pragma endregion PacketFunctions
+	#pragma endregion
 
 	SocketWrapper* mSocket;
 
@@ -72,7 +78,7 @@ private:
 	uint mNumAcksReceived = 0;
 
 	// A map of all of the packet receive callback functions.
-	std::map< std::string, std::function<void(uint)>> mPacketReceiveCallbacks;
+	std::map<PacketType, std::function<void()>> mPacketReceiveCallbacks;
 };
 
 #endif PACKET_HANDLER_H

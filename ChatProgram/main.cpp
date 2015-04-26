@@ -6,20 +6,20 @@
 //#include "CBE.h"
 
 
-#ifdef SERVER
-
-#include "Server.h"
-
-const u_short g_Port = 40000;
-
-int main()
-{
-	Server server("TestServer", g_Port);
-
-	return server.run();
-}
-
-#else
+//#ifdef SERVER
+//
+//#include "Server.h"
+//
+//const u_short g_Port = 40000;
+//
+//int main()
+//{
+//	Server server("TestServer", g_Port);
+//
+//	return server.run();
+//}
+//
+//#else
 
 int main()
 {
@@ -33,7 +33,7 @@ int main()
 	ABPacket* message = &msg;
 
 	PacketHandler handler(&sock);
-
+	handler.AssignAsClient();
 	///<<<<<<< HEAD
 	sock.Send(sendIP, message, sizeof(PacketMessage));
 
@@ -51,7 +51,7 @@ int main()
 	return 0;
 }
 
-#endif
+//#endif
 
 /*
 #include "Logger.h"
