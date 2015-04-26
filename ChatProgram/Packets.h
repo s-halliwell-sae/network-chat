@@ -58,6 +58,16 @@ public:
 		mPacketType = PT_DETECT_SERVER;
 	}
 };
+struct PacketServerInfo : ABPacket
+{
+public:
+	PacketServerInfo()
+	{
+		mPacketType = PT_SERVER_INFO;
+	}
+	// struct ServerInfo;
+};
+
 #pragma endregion
 
 #pragma region Server specific packets

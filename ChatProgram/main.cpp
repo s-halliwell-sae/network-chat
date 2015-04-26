@@ -16,6 +16,7 @@ int main()
 	ABPacket* message = &msg;
 	
 	PacketHandler handler(&sock);
+	handler.AssignAsClient();
 
 	sock.Send(sendIP, message, sizeof(PacketMessage));
 

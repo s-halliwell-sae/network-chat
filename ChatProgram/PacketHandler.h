@@ -30,13 +30,20 @@ public:
 
 	void PushPacket(ABPacket* pack);
 
+
+	void AssignAsClient();
+	void AssignAsServer();
+	
 private:
 	#pragma region Packet Functions
 	void Acknowledge();
 	void Heartbeat();
+
 	void CMessage();
 	void SMessage();
+
 	void DetectServer();
+	void ServerInfo();
 
 	void ChangeRoom();
 	void ChangeRoomRequest();
