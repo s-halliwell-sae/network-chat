@@ -41,8 +41,14 @@ void PacketHandler::SetSocket(SocketWrapper* sock)
 	mSocket = sock;
 }
 
+time_t PacketHandler::GetLastPacketTime()
+{
+	return mLastPacketTime;
+}
+
 void PacketHandler::PushPacket(ABPacket* pack)
 {
+	mLastPacketTime = time(0);
 	mCurrentPacket = pack;
 
 	switch (mCurrentPacket->mPacketType)

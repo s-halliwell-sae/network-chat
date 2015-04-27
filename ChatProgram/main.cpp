@@ -1,9 +1,30 @@
+#include "CBE.h"
 #include <iostream>
+#include <vector>
+#include <string>
+
+int main()
+{
+	CBE cbe = CBE();
+	cbe.mChatBox = "/createroom roomname password";
+	cbe.SubmitTextBox();
+
+	char* msg = new char();
+
+	while (1)
+	{
+		cbe.Update();
+		std::cin >> msg;
+		cbe.mChatBox = msg;
+		cbe.SubmitTextBox();
+	}
+	return 0;
+}
+/*#include <iostream>
 #include "SocketWrapper.h"
 #include "Packets.h"
 #include "IPAddress.h"
 
-//#include "CBE.h"
 int main()
 {
 	IPAddress IP = IPAddress("127.0.0.1");
@@ -33,7 +54,7 @@ int main()
 	}
 	return 0;
 }
-
+*/
 /*
 #include "Logger.h"
 #include "Encrypter.h"

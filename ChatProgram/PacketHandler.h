@@ -16,7 +16,7 @@ class PacketHandler
 public:
 	// ctor
 	PacketHandler(SocketWrapper* sock);
-	PacketHandler(){};
+	PacketHandler();
 	// dtor
 	~PacketHandler();
 
@@ -33,6 +33,8 @@ public:
 	void SetSocket(SocketWrapper* sock);
 
 	void PushPacket(ABPacket* pack);
+
+	time_t GetLastPacketTime();
 
 private:
 	#pragma region PacketFunctions
@@ -73,6 +75,9 @@ private:
 
 	// A map of all of the packet receive callback functions.
 	std::map< std::string, std::function<void(uint)>> mPacketReceiveCallbacks;
+
+	// Last packet recieved
+	time_t mLastPacketTime;
 };
 
 #endif PACKET_HANDLER_H
