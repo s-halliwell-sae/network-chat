@@ -8,6 +8,7 @@
 class ChatParser
 {
 public:
+	ChatParser(std::string chatCommandName);
 	ChatParser();
 	~ChatParser();
 	void Parse(std::string chatBox);

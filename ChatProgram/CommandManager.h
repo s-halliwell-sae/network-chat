@@ -14,10 +14,15 @@ class CommandManager
 {
 public:
 	CommandManager(){};
+	CommandManager(std::string chatCommandName);
 	~CommandManager(){};
-	void CallFunction(const std::string& pFunction, const std::string& value);
+	void CallFunction(std::vector<std::string>& value);
 	void AddFunction(const std::string& functionName, FunctionPointer pFunction);
+	bool FindFunction(const std::string& functionName);
 private:
 	function_map mFunctionMap;
+	//function_map::const_iterator mFMapIter;
+	function_map::iterator mFMapIter;
+	std::string mChatCommand;
 };
 #endif //COMMANDMANAGER_H

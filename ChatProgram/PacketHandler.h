@@ -34,6 +34,8 @@ public:
 
 	void PushPacket(ABPacket* pack);
 
+	time_t GetLastPacketTime();
+
 	void AssignAsClient();
 	void AssignAsServer();
 private:
@@ -79,6 +81,9 @@ private:
 
 	// A map of all of the packet receive callback functions.
 	std::map<PacketType, std::function<void()>> mPacketReceiveCallbacks;
+
+	// Last packet recieved
+	time_t mLastPacketTime;
 };
 
 #endif PACKET_HANDLER_H

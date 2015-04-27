@@ -42,6 +42,11 @@ void PacketHandler::SetSocket(SocketWrapper* sock)
 	mSocket = sock;
 }
 
+time_t PacketHandler::GetLastPacketTime()
+{
+	return mLastPacketTime;
+}
+
 void PacketHandler::PushPacket(ABPacket* pack)
 {
 	// Temporarily save the current packet
