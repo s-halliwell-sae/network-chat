@@ -25,6 +25,27 @@ int main()
 #include "Packets.h"
 #include "IPAddress.h"
 
+<<<<<<< HEAD
+=======
+//#include "CBE.h"
+
+
+//#ifdef SERVER
+//
+//#include "Server.h"
+//
+//const u_short g_Port = 40000;
+//
+//int main()
+//{
+//	Server server("TestServer", g_Port);
+//
+//	return server.run();
+//}
+//
+//#else
+
+>>>>>>> origin/master
 int main()
 {
 	IPAddress IP = IPAddress("127.0.0.1");
@@ -35,26 +56,32 @@ int main()
 	msg.SetMessage("This is a message from ASDF.");
 	msg.SetUserName("ASDF");
 	ABPacket* message = &msg;
-	
-	PacketHandler handler(&sock);
 
-<<<<<<< HEAD
+	PacketHandler handler(&sock);
+	handler.AssignAsClient();
+	///<<<<<<< HEAD
 	sock.Send(sendIP, message, sizeof(PacketMessage));
 
-//	CBE mCBE = CBE();
+	//	CBE mCBE = CBE();
 
-=======
-//	sock.Send(sendIP, message, sizeof(PacketMessage));
+	//=======
+	//	sock.Send(sendIP, message, sizeof(PacketMessage));
 	sock.Broadcast();
->>>>>>> origin/master
+	//>>>>>>> origin/master
 	while (1)
 	{
 		sock.Update();
-//		mCBE.Update();
+		//		mCBE.Update();
 	}
 	return 0;
 }
+<<<<<<< HEAD
 */
+=======
+
+//#endif
+
+>>>>>>> origin/master
 /*
 #include "Logger.h"
 #include "Encrypter.h"
