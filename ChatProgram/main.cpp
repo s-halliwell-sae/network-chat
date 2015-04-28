@@ -15,26 +15,45 @@
 //
 //#else
 
-#include <iostream>
+#include "Renderer.h"
 #include "include\libtcod.hpp"
+#include "IniManager.h"
 
 int main()
 {
-	bool endGame = false;
-	TCODConsole::initRoot(80, 50, "my game", false);
-	TCODSystem::setFps(25); // limit framerate to 25 frames per second
-	TCODConsole::root->setDefaultForeground(TCODColor(255, 0, 0));
-	TCODConsole::root->setDefaultBackground(TCODColor(128, 128, 128));
-	for (int i = 0; i < 10; ++i)
+	IniManager::getInstance().Init("Config/config.ini");
+
+	Renderer rman;
+
+	rman.SetupLayout(Renderer::CLIENT_CONNECTED);
+
+	std::vector<std::string> fakeUsers;
+
+	fakeUsers.push_back("Tommylommyjohnyybonny");
+	fakeUsers.push_back("Richard");
+	fakeUsers.push_back("Harry");
+
+	rman.SetContents("Users", fakeUsers);
+
+	std::vector<std::string> fakeRooms;
+
+	fakeRooms.push_back("Living Roomzzzzzzzzzzzzzzzzzzz");
+	fakeRooms.push_back("Bathroom");
+	fakeRooms.push_back("Kitchen");
+
+	rman.SetContents("Rooms", fakeRooms);
+
+	while (!TCODConsole::isWindowClosed())
 	{
-		TCODConsole::root->setDefaultForeground(TCODColor(i * 25, 0, 0));
-		TCODConsole::root->print(10 + i, 10 + i, "hi there");
+		//Cheeky shite
+		if (rman.PressedEnter())
+		{
+			rman.AddEntry("Chat Log", rman.RetrieveDynamicField());
+		}
+
+		rman.Update();
 	}
-	while (!endGame && !TCODConsole::isWindowClosed()) {
-		// ... draw on TCODConsole::root
-		TCODConsole::flush();
-		TCOD_key_t key = TCODConsole::checkForKeypress();
-	}
+
 	return 0;
 }
 /*
