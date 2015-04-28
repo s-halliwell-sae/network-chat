@@ -25,9 +25,9 @@ public:
 	void SendCreateRoom(std::vector<std::string> &values);		//Send a create room request without a password
 	void SendSetName(std::vector<std::string> &values);			//Send a name change request
 	void RequestRoomChange(std::vector<std::string> &values);	//Send a room change request
-	void SetRooms(std::vector<std::string> values);				//
-	bool IsServerDown();										//
-	void SetUsers(std::vector<std::string> users);				//
+	void SetRooms(std::vector<std::string> values);				//Updates the current list of rooms
+	bool IsServerDown();										//Checks if the server has timed out
+	void SetUsers(std::vector<std::string> users);				//Updates the list of users in the current room
 	std::string mChatBox;										//The chatbox which will be directly modified through the gui
 
 	void Update();
@@ -51,7 +51,7 @@ private:
 	IPAddress mServerAddr;						//The IPAddress of the server
 
 	float mKillTime = 5.0f;						//Amount of time that can pass before server times out
-	std::string mChatCommand = " sendmessage";	//
+	std::string mChatCommand = " sendmessage";	//The key to the send message function
 };
 
 #endif //CBE_H

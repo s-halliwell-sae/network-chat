@@ -94,7 +94,6 @@ void CBE::SendExitServer(std::vector<std::string> &values)
 	//Sends a disconnect packet to the server informing it that the user is
 	//leaving. After this the client is backed out to the searching for
 	//servers state and a broadcast for servers packet is sent out
-	
 }
 
 bool CBE::IsServerDown()
@@ -117,18 +116,18 @@ void CBE::SendCreateRoom(std::vector<std::string> &values)
 {
 	if (values.size() < 1)
 	{
-		//LOGWARN(userIn.username + " tried to access function " + function.name + " without proper arguments.");
+		//LOGWARN(" tried to access function " + __FUNCTION__ + " without proper arguments.");
 		std::cout << std::endl << "Invalid values when creating rooms" << std::endl;
 	}
 	PacketCreateRoomRequest* p = new PacketCreateRoomRequest();
 	strncpy_s(p->newRoomName, values[0].c_str(), ROOM_NAME_SIZE);
 	if (values.size() > 1)
 	{
-		strncpy_s(p->roomPassword, values[1].c_str(), ROOM_PASSWORD_SIZE);
+		strncpy_s(p->roomPassword, values[1].c_str(), PASSWORD_SIZE);
 	}
 	else
 	{
-		strncpy_s(p->roomPassword, std::string("").c_str(), ROOM_PASSWORD_SIZE);
+		strncpy_s(p->roomPassword, std::string("").c_str(), PASSWORD_SIZE);
 	}
 	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketCreateRoomRequest));
 }
