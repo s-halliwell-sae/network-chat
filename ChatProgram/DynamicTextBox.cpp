@@ -32,19 +32,6 @@ void DynamicTextBox::ProcessInput()
 	//TCOD_key_t key = TCODConsole::checkForKeypress();
 	mKey = TCODConsole::checkForKeypress();
 
-	//if (key.vk == TCODK_BACKSPACE)
-	//{
-	//	if (contents.size() > 0)
-	//	{
-	//		contents = contents.substr(0, contents.size() - 1);
-	//		InSync = false;
-	//	}
-	//}
-	//else if (key.c && key.vk != TCODK_ENTER && key.vk != TCODK_KPENTER)
-	//{
-	//	contents += key.c;
-	//	InSync = false;
-	//}
 	if (mKey.vk == TCODK_BACKSPACE)
 	{
 		if (contents.size() > 0)

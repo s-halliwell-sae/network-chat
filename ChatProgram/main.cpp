@@ -15,45 +15,12 @@
 //
 //#else
 
-#include "Renderer.h"
-#include "include\libtcod.hpp"
-#include "IniManager.h"
+#include "CBE.h"
 
 int main()
 {
-	IniManager::getInstance().Init("Config/config.ini");
-
-	Renderer rman;
-
-	rman.SetupLayout(Renderer::CLIENT_CONNECTED);
-
-	std::vector<std::string> fakeUsers;
-
-	fakeUsers.push_back("Tommy");
-	fakeUsers.push_back("Richard");
-	fakeUsers.push_back("Harry");
-
-	rman.SetContents("Users", fakeUsers);
-
-	std::vector<std::string> fakeRooms;
-
-	fakeRooms.push_back("Living Room");
-	fakeRooms.push_back("Bathroom");
-	fakeRooms.push_back("Kitchen");
-
-	rman.SetContents("Rooms", fakeRooms);
-
-	while (!TCODConsole::isWindowClosed())
-	{
-		//Cheeky shite
-		if (rman.PressedEnter())
-		{
-			rman.AddEntry("Chat Log", rman.RetrieveDynamicField());
-		}
-
-		rman.Update();
-	}
-
+	CBE program = CBE();
+	program.Run();
 	return 0;
 }
 /*

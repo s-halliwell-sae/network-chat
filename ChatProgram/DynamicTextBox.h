@@ -20,10 +20,11 @@ public:
 	void SetContents(std::vector<std::string> contentsIn);
 	const std::string& GetContents();
 
+	TCOD_key_t *GetKey(){ return &mKey; };
+
 protected:
 	int NumLines();
 
-	TCOD_key_t *GetKey(){ return &mKey; };
 private:
 	std::string contents;
 	TCOD_key_t mKey;

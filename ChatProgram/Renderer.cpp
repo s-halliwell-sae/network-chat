@@ -128,9 +128,9 @@ bool Renderer::PressedEnter()
 void Renderer::ProcessScroll()
 {
 	//Find text box with focus
-	TCOD_key_t key = TCODConsole::checkForKeypress();
+	TCOD_key_t *key = mDynamicField->GetKey();
 
-	if (key.vk == TCODK_UP)
+	if (key->vk == TCODK_UP)
 	{
 		LOG("UP");
 
@@ -140,7 +140,7 @@ void Renderer::ProcessScroll()
 			box->InSync = false;
 		}
 	}
-	else if (key.vk == TCODK_DOWN)
+	else if (key->vk == TCODK_DOWN)
 	{
 		LOG("DOWN");
 		for each (TextBox* box in mRenderables)
