@@ -4,9 +4,8 @@
 //#include <iostream>
 //#include <string>
 
-IniManager::IniManager()
-{
-
+namespace {
+	std::map <std::string, std::string> configData;
 }
 
 IniManager::~IniManager()

@@ -30,6 +30,7 @@
     <ClCompile Include="CBE.cpp" />
     <ClCompile Include="ChatParser.cpp" />
     <ClCompile Include="CommandManager.cpp" />
+    <ClCompile Include="DynamicTextBox.cpp" />
     <ClCompile Include="Encrypter.cpp" />
     <ClCompile Include="IniManager.cpp" />
     <ClCompile Include="IPAddress.cpp" />
@@ -38,9 +39,11 @@
     <ClCompile Include="MurmurHash3.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Pending.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +51,7 @@
     <ClInclude Include="CBE.h" />
     <ClInclude Include="ChatParser.h" />
     <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="DynamicTextBox.h" />
     <ClInclude Include="Encrypter.h" />
     <ClInclude Include="IniManager.h" />
     <ClInclude Include="IPAddress.h" />
@@ -56,11 +60,13 @@
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Packets.h" />
     <ClInclude Include="Pending.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="ServerInfo.h" />
     <ClInclude Include="SocketWrapper.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

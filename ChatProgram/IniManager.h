@@ -7,8 +7,13 @@ class IniManager
 {
 public:
 
-	IniManager();
 	~IniManager();
+
+	static IniManager& getInstance()
+	{
+		static IniManager instance;
+		return instance;
+	}
 
 	bool Init(const char* fileLoc);
 
@@ -20,7 +25,9 @@ public:
 	bool GetBool(const std::string& key, bool& outVar);
 
 private:
-	std::map <std::string, std::string> configData;
+	IniManager() {};
+	IniManager(IniManager const&) = delete;
+	void operator=(IniManager const&) = delete;
 };
 
 #endif //INIMANAGER_H
