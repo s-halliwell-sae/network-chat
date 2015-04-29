@@ -2,6 +2,7 @@
 #define DYNAMICTEXTBOX_H
 
 #include "TextBox.h"
+#include "include\libtcod.hpp"
 
 class DynamicTextBox : public TextBox
 {
@@ -19,8 +20,11 @@ public:
 	void SetContents(std::vector<std::string> contentsIn);
 	const std::string& GetContents();
 
+	TCOD_key_t *GetKey(){ return &mKey; };
+
 private:
 	std::string contents;
+	TCOD_key_t mKey;
 };
 
 #endif

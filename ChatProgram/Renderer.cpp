@@ -89,9 +89,11 @@ bool Renderer::AddEntry(std::string key, std::string newEntry)
 
 bool Renderer::PressedEnter()
 {
-	TCOD_key_t key = TCODConsole::checkForKeypress();
+	//TCOD_key_t key = TCODConsole::checkForKeypress();
+	TCOD_key_t *key = mDynamicField->GetKey();
 
-	if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER)
+	//if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER)
+	if (key->vk == TCODK_ENTER || key->vk == TCODK_KPENTER)
 	{
 		return true;
 	}

@@ -29,9 +29,23 @@ DynamicTextBox::DynamicTextBox(float posX, float posY, float width, float height
 void DynamicTextBox::ProcessInput()
 {
 	//LOG("PI");
-	TCOD_key_t key = TCODConsole::checkForKeypress();
+	//TCOD_key_t key = TCODConsole::checkForKeypress();
+	mKey = TCODConsole::checkForKeypress();
 
-	if (key.vk == TCODK_BACKSPACE)
+	//if (key.vk == TCODK_BACKSPACE)
+	//{
+	//	if (contents.size() > 0)
+	//	{
+	//		contents = contents.substr(0, contents.size() - 1);
+	//		InSync = false;
+	//	}
+	//}
+	//else if (key.c && key.vk != TCODK_ENTER && key.vk != TCODK_KPENTER)
+	//{
+	//	contents += key.c;
+	//	InSync = false;
+	//}
+	if (mKey.vk == TCODK_BACKSPACE)
 	{
 		if (contents.size() > 0)
 		{
@@ -39,9 +53,9 @@ void DynamicTextBox::ProcessInput()
 			InSync = false;
 		}
 	}
-	else if (key.c && key.vk != TCODK_ENTER && key.vk != TCODK_KPENTER)
+	else if (mKey.c && mKey.vk != TCODK_ENTER && mKey.vk != TCODK_KPENTER)
 	{
-		contents += key.c;
+		contents += mKey.c;
 		InSync = false;
 	}
 }

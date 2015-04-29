@@ -12,6 +12,8 @@
 
 #include "IPAddress.h"
 
+#include "Renderer.h"
+
 class CBE
 {
 public:
@@ -21,7 +23,7 @@ public:
 	void BroadcastForServers(std::vector<std::string> &values);	//Broadcast a looking for server packet
 	void SendExitRoom(std::vector<std::string> &values);		//Exit the current room out to the lobby (if already in the lobby this will do nothing)
 	void SendExitServer(std::vector<std::string> &values);		//Safe disconnect from the server
-	void AppendColour();										//Add the previosly used colours onto the start of the message
+	void AppendColour(std::vector<std::string> &values);		//Add the previosly used colours onto the start of the message
 	void SendCreateRoom(std::vector<std::string> &values);		//Send a create room request without a password
 	void SendSetName(std::vector<std::string> &values);			//Send a name change request
 	void RequestRoomChange(std::vector<std::string> &values);	//Send a room change request
@@ -29,13 +31,18 @@ public:
 	bool IsServerDown();										//Checks if the server has timed out
 	void SetUsers(std::vector<std::string> users);				//Updates the list of users in the current room
 	std::string mChatBox;										//The chatbox which will be directly modified through the gui
+	std::vector<std::string> mChatLog;
 
 	void Update();
 	void SetServersFound(std::vector<ServerInfo> serversFound);
 	void SetServerAddr(IPAddress addr);
 	void SubmitTextBox();
+	void SubmitTextBox(std::string text);
+
+	void RecieveMessage(std::string message);
 
 	void SendChatMessage(std::vector<std::string> &values);
+	void Run();
 private:
 	std::string mCurrentRoom;					//The current room this client is connected to
 	int mCurFG;									//The most recent foreground colour used
@@ -52,6 +59,10 @@ private:
 
 	float mKillTime = 5.0f;						//Amount of time that can pass before server times out
 	std::string mChatCommand = " sendmessage";	//The key to the send message function
+	std::string mAppendCommand = " appendColour";
+
+
+	Renderer mRenderer;
 };
 
 #endif //CBE_H

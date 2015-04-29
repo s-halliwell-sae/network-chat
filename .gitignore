@@ -33,3 +33,4 @@ ChatProgram/Log.txt
 *.log
 ChatProgram/Server Debug/ChatProgram.tlog/cl.command.1.tlog
 *.tlog
+ChatProgram.v12.suo

@@ -3,9 +3,11 @@
 #include <string>
 #include <iostream>
 
-ChatParser::ChatParser(std::string chatCommandName)
+ChatParser::ChatParser(std::string chatCommandName, std::string appendCommandName)
 {
-	mCommandManager = CommandManager(chatCommandName);
+	mCommandManager = CommandManager();
+	mChatCommand = chatCommandName;
+	mAppendCommand = appendCommandName;
 }
 ChatParser::ChatParser(){}
 ChatParser::~ChatParser(){}
@@ -23,30 +25,42 @@ void ChatParser::Parse(std::string chatBox)
 	std::string command;
 	size_t pos = 0;
 	std::string token;
-	if ((pos = parsed.find(delimiter)) != std::string::npos)
+	if (parsed.size() > 0 && parsed.substr(0, 1) == "/")
 	{
-		command = parsed.substr(0, pos);
-		if (GetCommandManager()->FindFunction(command))
+		if ((pos = parsed.find(delimiter)) != std::string::npos)
 		{
-			parsed.erase(0, pos + sizeof(delimiter));
-			while ((pos = parsed.find(delimiter)) != std::string::npos)
+			command = parsed.substr(0, pos);
+			if (GetCommandManager()->FindFunction(command))
 			{
-				token = parsed.substr(0, pos);
-				values.push_back(token);
 				parsed.erase(0, pos + sizeof(delimiter));
+				while ((pos = parsed.find(delimiter)) != std::string::npos)
+				{
+					token = parsed.substr(0, pos);
+					values.push_back(token);
+					parsed.erase(0, pos + sizeof(delimiter));
+				}
+				pos = parsed.length();
+				if (pos != 0)
+				{
+					token = parsed.substr(0, pos);
+					values.push_back(token);
+					parsed.erase();
+				}
+				std::cout << std::endl << "Executing Found Command";
+				GetCommandManager()->CallFunction(values);
+				return;
 			}
-			pos = parsed.length();
-			if (pos != 0)
-			{
-				token = parsed.substr(0, pos);
-				values.push_back(token);
-				parsed.erase();
-			}
-			GetCommandManager()->CallFunction(values);
 		}
-		if (GetCommandManager()->FindFunction(command))
-		{
-
-		}
+	}
+	if (GetCommandManager()->FindFunction(mAppendCommand))
+	{
+		std::cout << std::endl << "Trying to Append Colour";
+		values.push_back(parsed);
+		GetCommandManager()->CallFunction(values);
+	}
+	if (GetCommandManager()->FindFunction(mChatCommand))
+	{
+		std::cout << std::endl << "Trying to Send Message";
+		GetCommandManager()->CallFunction(values);
 	}
 }
