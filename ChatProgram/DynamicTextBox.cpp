@@ -73,7 +73,13 @@ void DynamicTextBox::AddEntry(std::string newEntry)
 
 void DynamicTextBox::Render()
 {
+	//LOG(std::to_string(startingLine));
 	ResetCursor();
 	RenderFrame();
 	PrintLine(contents);
+}
+
+int DynamicTextBox::NumLines()
+{
+	return LinesOnScreen(contents.length());
 }

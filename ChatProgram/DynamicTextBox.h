@@ -19,6 +19,9 @@ public:
 	void SetContents(std::vector<std::string> contentsIn);
 	const std::string& GetContents();
 
+protected:
+	int NumLines();
+
 private:
 	std::string contents;
 };

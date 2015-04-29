@@ -25,6 +25,8 @@ public:
 
 private:
 
+	void ProcessScroll();
+
 	void RenderAll();
 
 	bool CheckForChanges();

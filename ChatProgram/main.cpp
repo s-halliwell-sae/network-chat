@@ -29,7 +29,7 @@ int main()
 
 	std::vector<std::string> fakeUsers;
 
-	fakeUsers.push_back("Tommylommyjohnyybonny");
+	fakeUsers.push_back("Tommy");
 	fakeUsers.push_back("Richard");
 	fakeUsers.push_back("Harry");
 
@@ -37,7 +37,7 @@ int main()
 
 	std::vector<std::string> fakeRooms;
 
-	fakeRooms.push_back("Living Roomzzzzzzzzzzzzzzzzzzz");
+	fakeRooms.push_back("Living Room");
 	fakeRooms.push_back("Bathroom");
 	fakeRooms.push_back("Kitchen");
 

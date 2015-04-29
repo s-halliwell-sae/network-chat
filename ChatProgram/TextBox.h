@@ -25,8 +25,12 @@ public:
 
 	std::string prefix = "";
 
+	void Scroll(int factor);
+
 protected:
 	std::string name;
+
+	int startingLine = 0;
 
 	//Position
 	float x;
@@ -42,6 +46,11 @@ protected:
 	void RenderFrame();
 	void PrintLine(std::string& line);
 	void ResetCursor();
+
+	virtual int NumLines();
+
+	int LinesOnScreen(int contentLength);
+
 private:
 	std::vector<std::string> contents;
 };

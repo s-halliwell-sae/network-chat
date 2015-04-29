@@ -1,6 +1,12 @@
 #include "Renderer.h"
 #include "include\libtcod.hpp"
 #include "IniManager.h"
+#include "Windows.h"
+
+namespace
+{
+	WPARAM wparam;
+}
 
 Renderer::Renderer()
 {
@@ -18,6 +24,9 @@ void Renderer::SetupLayout(GUILayout style)
 	int resY;
 	IniManager::getInstance().GetInt("screenWidth", resX);
 	IniManager::getInstance().GetInt("screenHeight", resY);
+
+	resX = CLAMP(30, 9999, resX);
+	resY = CLAMP(30, 9999, resY);
 
 	TCODConsole::initRoot(resX, resY, "Client", false);
 	TCODSystem::setFps(25); // limit framerate to 25 frames per second
@@ -38,7 +47,7 @@ void Renderer::SetupLayout(GUILayout style)
 		mRenderables.push_back(new TextBox(1, 1, int(stepX * 1.5), (stepY * 8), "Rooms", "- "));
 		mDynamicField = new DynamicTextBox(1, (stepY * 8), resX - 2, (stepY * 2) - 1, "Input Field");
 		mRenderables.push_back(mDynamicField);
-		LOG(std::to_string((stepY * 2) - 1));
+		//LOG(std::to_string((stepY * 2) - 1));
 	}
 	else if (style == GUILayout::SERVER_SETUP)
 	{
@@ -52,7 +61,20 @@ void Renderer::SetupLayout(GUILayout style)
 
 void Renderer::Update()
 {
+	/*
+	UINT msg;
+
+	switch (msg)
+	{
+	case WM_MOUSEHWHEEL:
+	{
+		DWORD x = HIWORD(wParam);
+		break;
+	}
+	}*/
+	ProcessScroll();
 	mDynamicField->ProcessInput();
+
 	if (CheckForChanges())
 	{
 		RenderAll();
@@ -98,6 +120,32 @@ bool Renderer::PressedEnter()
 	else
 	{
 		return false;
+	}
+}
+
+void Renderer::ProcessScroll()
+{
+	//Find text box with focus
+	TCOD_key_t key = TCODConsole::checkForKeypress();
+
+	if (key.vk == TCODK_UP)
+	{
+		LOG("UP");
+
+		for each (TextBox* box in mRenderables)
+		{
+			box->Scroll(1);
+			box->InSync = false;
+		}
+	}
+	else if (key.vk == TCODK_DOWN)
+	{
+		LOG("DOWN");
+		for each (TextBox* box in mRenderables)
+		{
+			box->Scroll(-1);
+			box->InSync = false;
+		}
 	}
 }
 

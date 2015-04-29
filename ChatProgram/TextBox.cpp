@@ -86,11 +86,9 @@ void TextBox::PrintLine(std::string& line)
 
 	int iterations = 0;
 	int temp = printedLine.length();
-	while (temp > int(w - 2))
-	{
-		iterations++;
-		temp -= int(w - 2);
-	}
+	
+	iterations = LinesOnScreen(temp) - 1;
+
 	for (int i = 0; i <= iterations; ++i)
 	{
 		if (((cursorY - y) + i) > (h - 2))
@@ -101,8 +99,38 @@ void TextBox::PrintLine(std::string& line)
 	cursorY += (iterations + 1);
 }
 
+void TextBox::Scroll(int factor)
+{
+	//LOG(std::to_string(factor));
+	startingLine += factor;
+	int max = NumLines();
+	startingLine = CLAMP(0, max, startingLine);
+}
+
 void TextBox::ResetCursor()
 {
 	cursorX = x + 1;
 	cursorY = y + 3;
+}
+
+int TextBox::NumLines()
+{
+	//TEST
+	int ret = 0;
+	for each (std::string line in contents)
+	{
+		ret += LinesOnScreen(line.length());
+	}
+	return ret;
+}
+
+int TextBox::LinesOnScreen(int contentLength)
+{
+	int ret = 0;
+	while (contentLength > int(w - 2))
+	{
+		ret++;
+		contentLength -= int(w - 2);
+	}
+	return ret + 1;
 }
