@@ -25,6 +25,18 @@
     <Filter Include="Header Files\GUI">
       <UniqueIdentifier>{c31a9762-1b55-45ad-a7e4-f32f2cdf7fab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ChatRoom">
+      <UniqueIdentifier>{410a0f36-ec3e-4c7d-9bd3-93219d2af00e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ChatRoom">
+      <UniqueIdentifier>{61ce792d-6514-4a9c-b84c-239e76c28c2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ClientBackEnd">
+      <UniqueIdentifier>{64f70775-fe0d-4104-ad9d-0da1a5b3b510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ClientBackEnd">
+      <UniqueIdentifier>{8a20dee9-f4f9-44e4-a252-5fc5ad1ef625}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IniManager.cpp">
@@ -54,22 +66,7 @@
     <ClCompile Include="IPAddress.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Room.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Server.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="User.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CBE.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ChatParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
@@ -80,6 +77,21 @@
     </ClCompile>
     <ClCompile Include="DynamicTextBox.cpp">
       <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>Source Files\ChatRoom</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Source Files\ChatRoom</Filter>
+    </ClCompile>
+    <ClCompile Include="CBE.cpp">
+      <Filter>Source Files\ClientBackEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="ChatParser.cpp">
+      <Filter>Source Files\ClientBackEnd</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandManager.cpp">
+      <Filter>Source Files\ClientBackEnd</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,22 +131,7 @@
     <ClInclude Include="IPAddress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Room.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Server.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CBE.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ChatParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommandManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
@@ -145,6 +142,21 @@
     </ClInclude>
     <ClInclude Include="DynamicTextBox.h">
       <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>Header Files\ChatRoom</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Header Files\ChatRoom</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandManager.h">
+      <Filter>Header Files\ClientBackEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="ChatParser.h">
+      <Filter>Header Files\ClientBackEnd</Filter>
+    </ClInclude>
+    <ClInclude Include="CBE.h">
+      <Filter>Header Files\ClientBackEnd</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

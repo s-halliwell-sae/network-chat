@@ -1,9 +1,8 @@
 #include "CommandManager.h"
 #include <iostream>
 
-CommandManager::CommandManager(std::string chatCommandName)
+CommandManager::CommandManager()
 {
-	mChatCommand = chatCommandName;
 }
 
 void CommandManager::CallFunction(std::vector<std::string>& value)

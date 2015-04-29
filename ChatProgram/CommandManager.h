@@ -13,8 +13,7 @@ typedef std::map<std::string, FunctionPointer> function_map;
 class CommandManager
 {
 public:
-	CommandManager(){};
-	CommandManager(std::string chatCommandName);
+	CommandManager();
 	~CommandManager(){};
 	void CallFunction(std::vector<std::string>& value);
 	void AddFunction(const std::string& functionName, FunctionPointer pFunction);
@@ -24,5 +23,6 @@ private:
 	//function_map::const_iterator mFMapIter;
 	function_map::iterator mFMapIter;
 	std::string mChatCommand;
+	std::string mAppendCommand;
 };
 #endif //COMMANDMANAGER_H

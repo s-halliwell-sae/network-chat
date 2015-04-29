@@ -15,44 +15,54 @@
 //
 //#else
 
-#include "Renderer.h"
-#include "include\libtcod.hpp"
-#include "IniManager.h"
+//#include "Renderer.h"
+//#include "include\libtcod.hpp"
+//#include "IniManager.h"
+//
+//#include <string>
+//#include <iostream>
+
+#include "CBE.h"
 
 int main()
 {
-	IniManager::getInstance().Init("Config/config.ini");
+	//IniManager::getInstance().Init("Config/config.ini");
+	//
+	//Renderer rman;
+	//
+	//rman.SetupLayout(Renderer::CLIENT_CONNECTED);
+	//
+	//std::vector<std::string> fakeUsers;
+	//
+	//fakeUsers.push_back("Tommylommyjohnyybonny");
+	//fakeUsers.push_back("Richard");
+	//fakeUsers.push_back("Harry");
+	//
+	//rman.SetContents("Users", fakeUsers);
+	//
+	//std::vector<std::string> fakeRooms;
+	//
+	//fakeRooms.push_back("Living Roomzzzzzzzzzzzzzzzzzzz");
+	//fakeRooms.push_back("Bathroom");
+	//fakeRooms.push_back("Kitchen");
+	//
+	//rman.SetContents("Rooms", fakeRooms);
+	//
+	//std::string temp;
+	//
+	//while (!TCODConsole::isWindowClosed())
+	//{
+	//	//Cheeky shite
+	//	if (rman.PressedEnter())
+	//	{
+	//		rman.AddEntry("Chat Log", rman.RetrieveDynamicField());
+	//	}
+	//	rman.Update();
+	//}
 
-	Renderer rman;
+	CBE cbe = CBE();
 
-	rman.SetupLayout(Renderer::CLIENT_CONNECTED);
-
-	std::vector<std::string> fakeUsers;
-
-	fakeUsers.push_back("Tommylommyjohnyybonny");
-	fakeUsers.push_back("Richard");
-	fakeUsers.push_back("Harry");
-
-	rman.SetContents("Users", fakeUsers);
-
-	std::vector<std::string> fakeRooms;
-
-	fakeRooms.push_back("Living Roomzzzzzzzzzzzzzzzzzzz");
-	fakeRooms.push_back("Bathroom");
-	fakeRooms.push_back("Kitchen");
-
-	rman.SetContents("Rooms", fakeRooms);
-
-	while (!TCODConsole::isWindowClosed())
-	{
-		//Cheeky shite
-		if (rman.PressedEnter())
-		{
-			rman.AddEntry("Chat Log", rman.RetrieveDynamicField());
-		}
-
-		rman.Update();
-	}
+	cbe.Run();
 
 	return 0;
 }

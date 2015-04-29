@@ -3,12 +3,15 @@
 #include <string>
 #include "Packets.h"
 
+#include "include\libtcod.hpp"
 #include "Logger.h"
+//#include "Renderer.h"
+#include "IniManager.h"
 
 CBE::CBE()
 {
 //	mServer = new User("WAITINGFORSERVER");
-	mParser = ChatParser(mChatCommand);
+	mParser = ChatParser(mChatCommand, mAppendCommand);
 
 	FunctionPointer fp;
 	fp = std::bind(&CBE::SendCreateRoom, this, std::placeholders::_1);
@@ -26,9 +29,12 @@ CBE::CBE()
 	mParser.GetCommandManager()->AddFunction("/lookforservers", fp);
 
 	//sendChatMessage
-	fp = std::bind(&CBE::BroadcastForServers, this, std::placeholders::_1);
+	fp = std::bind(&CBE::SendChatMessage, this, std::placeholders::_1);
 	mParser.GetCommandManager()->AddFunction(mChatCommand, fp);
 
+	//AppendColour
+	fp = std::bind(&CBE::AppendColour, this, std::placeholders::_1);
+	mParser.GetCommandManager()->AddFunction(mAppendCommand, fp);
 
 	mPacketHandler = PacketHandler(&mSocket);
 
@@ -40,17 +46,58 @@ CBE::~CBE()
 	//mServer = nullptr;
 };
 
+void CBE::Run()
+{
+	//Setup all the things
+	IniManager::getInstance().Init("Config/config.ini");
+	mRenderer.SetupLayout(Renderer::CLIENT_CONNECTED);
+
+#pragma region TempStuffForTesting
+	std::vector<std::string> fakeUsers;
+
+	fakeUsers.push_back("Tommylommyjohnyybonny");
+	fakeUsers.push_back("Richard");
+	fakeUsers.push_back("Harry");
+
+	mRenderer.SetContents("Users", fakeUsers);
+
+	std::vector<std::string> fakeRooms;
+
+	fakeRooms.push_back("Living Roomzzzzzzzzzzzzzzzzzzz");
+	fakeRooms.push_back("Bathroom");
+	fakeRooms.push_back("Kitchen");
+
+	mRenderer.SetContents("Rooms", fakeRooms);
+#pragma endregion DeleteLater
+	//Main loop
+	while (!TCODConsole::isWindowClosed())
+	{
+		Update();
+		//UpdateGUI
+		if (mRenderer.PressedEnter())
+		{
+			SubmitTextBox(mRenderer.RetrieveDynamicField());
+		}
+		mRenderer.Update();
+	}
+}
+
 void CBE::Update()
 {
-	mSocket.Update();
-	mPacketHandler.Update();
-	if (IsServerDown())
-	{
-		SendExitServer(std::vector<std::string>());
-		//Set the state to looking for servers
-		//Maybe display a server timed out message
-		BroadcastForServers(std::vector<std::string>());
-	}
+	//mSocket.Update();
+	//mPacketHandler.Update();
+	//if (IsServerDown())
+	//{
+	//	SendExitServer(std::vector<std::string>());
+	//	//Set the state to looking for servers
+	//	//Maybe display a server timed out message
+	//	BroadcastForServers(std::vector<std::string>());
+	//}
+}
+
+void CBE::SubmitTextBox(std::string text)
+{
+	mParser.Parse(text);
 }
 
 void CBE::SubmitTextBox()
@@ -60,13 +107,21 @@ void CBE::SubmitTextBox()
 
 void CBE::SendChatMessage(std::vector<std::string> &values)
 {
+	if (values.size() < 1)
+	{
+		values.push_back(" ");
+	}
 	PacketMessage* p = new PacketMessage();
 	strncpy_s(p->message, values[0].c_str(), MESSAGE_SIZE);
 	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketMessage));
 }
 
-void CBE::AppendColour()
+void CBE::AppendColour(std::vector<std::string> &values)
 {
+	if (values.size() < 1)
+	{
+		values.push_back(" ");
+	}
 	std::string colour = "";
 	colour.append("[");
 	colour.append(std::to_string(mcurBG));
@@ -107,6 +162,11 @@ bool CBE::IsServerDown()
 
 void CBE::RequestRoomChange(std::vector<std::string> &values)
 {
+	if (values.size() < 1)
+	{
+		LOG("Invalid parameters used when setting name.");
+		return;
+	}
 	PacketChangeRoomRequest* p = new PacketChangeRoomRequest();
 	strncpy_s(p->newRoomName, values[0].c_str(), ROOM_NAME_SIZE);
 	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeRoomRequest));
@@ -116,8 +176,7 @@ void CBE::SendCreateRoom(std::vector<std::string> &values)
 {
 	if (values.size() < 1)
 	{
-		//LOGWARN(" tried to access function " + __FUNCTION__ + " without proper arguments.");
-		std::cout << std::endl << "Invalid values when creating rooms" << std::endl;
+		LOG("Invalid parameters used when trying to create room.");
 	}
 	PacketCreateRoomRequest* p = new PacketCreateRoomRequest();
 	strncpy_s(p->newRoomName, values[0].c_str(), ROOM_NAME_SIZE);
@@ -134,6 +193,11 @@ void CBE::SendCreateRoom(std::vector<std::string> &values)
 
 void CBE::SendSetName(std::vector<std::string> &values)
 {
+	if (values.size() < 1)
+	{
+		LOG("Invalid parameters used when setting name.");
+		return;
+	}
 	PacketChangeUserNameRequest* p = new PacketChangeUserNameRequest();
 	strncpy_s(p->newUserName, values[0].c_str(), USER_NAME_SIZE);
 	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeUserNameRequest));
@@ -157,4 +221,8 @@ void CBE::SetServersFound(std::vector<ServerInfo> serversFound)
 void CBE::SetServerAddr(IPAddress addr)
 {
 	mServerAddr = addr;
+}
+void CBE::RecieveMessage(std::string message)
+{
+	mRenderer.AddEntry("Chat Log", message);
 }
