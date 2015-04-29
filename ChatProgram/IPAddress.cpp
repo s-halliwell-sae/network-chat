@@ -1,7 +1,6 @@
 #include "IPAddress.h"
 #include <WS2tcpip.h>
 
-#include <iostream>
 
 // ctors
 IPAddress::IPAddress()
@@ -30,7 +29,7 @@ void IPAddress::SetAddress(unsigned long IPAddr)
 }
 
 // getters
-unsigned long IPAddress::GetIPAddress()
+unsigned long IPAddress::GetIPAddress() const
 {
 	return mIPAddress;
 }

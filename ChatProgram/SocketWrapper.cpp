@@ -66,7 +66,7 @@ void SocketWrapper::Init()
 	//Bind
 	if (Bind())
 	{
-		printf("Binding done.\n");
+		printf("Binding done on port: %i.\n", mPort);
 	}
 	mRecvLength = sizeof(mSourceAddress);
 }
@@ -98,12 +98,14 @@ void SocketWrapper::Recieve()
 	}
 	mLatestPacket = (ABPacket*)buffer;
 }
+
 void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 {
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(mPort);
+	//address.sin_port = htons(mPort);
+	address.sin_port = htons(40000);
 
 	char* buffer = new char[size];
 	memset(buffer, '\0', size);
@@ -123,7 +125,7 @@ void SocketWrapper::Send(IPAddress addr, const char* packet)
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(mPort);
+	//address.sin_port = htons(40000);
 
 	// Send the packet
 	if (sendto(mSocket, packet, strlen(packet)+1, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
@@ -139,7 +141,8 @@ void SocketWrapper::Broadcast()
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = IPAddress("255.255.255.255").GetIPAddress();
-	address.sin_port = htons(mPort);
+	//address.sin_port = htons(mPort);
+	address.sin_port = htons(40000);
 
 	PacketDetectServer* pds = new PacketDetectServer();
 
@@ -197,4 +200,20 @@ bool SocketWrapper::Bind()
 		exit(EXIT_FAILURE);
 	}
 	return true;
+}
+
+
+ABPacket* SocketWrapper::getLatestPacket()
+{
+	return mLatestPacket;
+}
+
+unsigned short SocketWrapper::getSenderPort()
+{
+	return ntohs(mSourceAddress.sin_port);
+}
+
+unsigned long SocketWrapper::getSenderIP()
+{
+	return mSourceAddress.sin_addr.S_un.S_addr;
 }

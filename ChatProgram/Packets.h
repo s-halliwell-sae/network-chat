@@ -2,6 +2,7 @@
 #define PACKETS_H
 #include <string.h>
 #include "ABPacket.h"
+#include "ServerInfo.h"
 // ABPacket holds the enum of PacketType
 
 #define MESSAGE_SIZE 1024
@@ -65,7 +66,7 @@ public:
 	{
 		mPacketType = PT_SERVER_INFO;
 	}
-	// ServerInfo info;
+	ServerInfo info;
 };
 #pragma endregion
 

@@ -2,6 +2,7 @@
 #define DYNAMICTEXTBOX_H
 
 #include "TextBox.h"
+#include "include\libtcod.hpp"
 
 class DynamicTextBox : public TextBox
 {
@@ -22,8 +23,10 @@ public:
 protected:
 	int NumLines();
 
+	TCOD_key_t *GetKey(){ return &mKey; };
 private:
 	std::string contents;
+	TCOD_key_t mKey;
 };
 
 #endif

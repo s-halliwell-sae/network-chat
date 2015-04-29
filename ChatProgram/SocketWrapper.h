@@ -42,6 +42,10 @@ public:
 	void SendToHandler();
 	void PopWaitingData();
 
+	ABPacket* getLatestPacket();
+	unsigned short getSenderPort();
+	unsigned long getSenderIP();
+
 
 private:
 	// The buffer to temporarily hold data before sending it to a handler

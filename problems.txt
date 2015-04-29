@@ -1,0 +1,24 @@
+Major things
+------------
+
+PacketHandler has no access to server information, and since it's a layered API, it shouldn't. 
+This means that I cannot place server code in PacketHander.cpp. Instead, I, as the caller, need
+to be able to set the callbacks.
+
+PacketHandler callbacks don't need to all have the same signature, you can have a bound function for
+each type and set them on an individual basis. This would be more convenient.
+
+Need a way to set the port on an existing socket instead of creating a new one for each user and non
+user sent packet. Alternatively have the Send function accept a port as a parameter. This is necessary
+because I need to collect user ports, and you're forced to bind it by creating a new socket which can't
+happen as the client is already bound to it.
+
+SocketWrapper takes an IP in the constructor, and then you have to give it another IP every time you
+want to send something.
+
+Not as Major things
+-------------------
+
+CheckForWaitingData() calls Retrieve(), but the name doesn't imply that it should.
+
+
