@@ -1,5 +1,5 @@
 #include "CommandManager.h"
-#include <iostream>
+#include "Logger.h"
 
 CommandManager::CommandManager()
 {
@@ -20,7 +20,7 @@ bool CommandManager::FindFunction(const std::string& functionName)
 	mFMapIter = mFunctionMap.find(functionName);
 	if (mFMapIter == mFunctionMap.end())
 	{
-		std::cout << "No function named " << functionName << std::endl;
+		LOG("Could not find function " + functionName);
 		return false;// not found
 	}
 	return true;

@@ -84,15 +84,16 @@ void CBE::Run()
 
 void CBE::Update()
 {
-	//mSocket.Update();
-	//mPacketHandler.Update();
-	//if (IsServerDown())
-	//{
-	//	SendExitServer(std::vector<std::string>());
+	mSocket.Update();
+	mPacketHandler.Update();
+	if (IsServerDown())
+	{
+		LOG("Server timed out, disconnecting.");
+		SendExitServer(std::vector<std::string>());
 	//	//Set the state to looking for servers
 	//	//Maybe display a server timed out message
-	//	BroadcastForServers(std::vector<std::string>());
-	//}
+		BroadcastForServers(std::vector<std::string>());
+	}
 }
 
 void CBE::SubmitTextBox(std::string text)
@@ -133,6 +134,7 @@ void CBE::AppendColour(std::vector<std::string> &values)
 
 void CBE::BroadcastForServers(std::vector<std::string> &values)
 {
+	LOG("FUCK YOUR SHIT");
 	PacketDetectServer* p = new PacketDetectServer();
 	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketDetectServer));
 }
