@@ -158,5 +158,8 @@
     <ClInclude Include="CBE.h">
       <Filter>Header Files\ClientBackEnd</Filter>
     </ClInclude>
+    <ClInclude Include="WindowBounds.h">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

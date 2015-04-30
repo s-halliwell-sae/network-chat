@@ -68,6 +68,7 @@
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="User.h" />
+    <ClInclude Include="WindowBounds.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EC8FE84-A4A4-41F7-9ACC-9214952663DE}</ProjectGuid>

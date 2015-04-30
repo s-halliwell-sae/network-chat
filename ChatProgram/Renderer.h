@@ -4,6 +4,7 @@
 #include <vector>
 #include "TextBox.h"
 #include "DynamicTextBox.h"
+#include "Windows.h"
 
 class Renderer
 {
@@ -34,6 +35,11 @@ private:
 	std::vector<TextBox*> mRenderables;
 
 	DynamicTextBox* mDynamicField;
+
+	int windowX;
+	int windowY;
+
+	HWND hwnd;
 };
 
 #endif

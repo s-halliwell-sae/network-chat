@@ -9,8 +9,9 @@ DynamicTextBox::DynamicTextBox(float posX, float posY, float width, float height
 	h = height;
 	w = width;
 	name = title;
-	cursorX = x + 1;
-	cursorY = y + 3;
+	ResetCursor();
+	SetWindowDimensions();
+	mScrollSpeed = 1;
 }
 
 DynamicTextBox::DynamicTextBox(float posX, float posY, float width, float height, std::string title, std::string prefixIn) : TextBox(posX, posY, height, width, title, prefixIn)
@@ -20,29 +21,29 @@ DynamicTextBox::DynamicTextBox(float posX, float posY, float width, float height
 	h = height;
 	w = width;
 	name = title;
-	cursorX = x + 1;
-	cursorY = y + 3;
+	ResetCursor();
 	prefix = prefixIn;
+	SetWindowDimensions();
+	mScrollSpeed = 1;
 }
 
-//Work out awkwardness for the keypresses. Needs to be fixed.
 void DynamicTextBox::ProcessInput()
 {
-	//LOG("PI");
-	//TCOD_key_t key = TCODConsole::checkForKeypress();
-	mKey = TCODConsole::checkForKeypress();
+	mKey = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 
 	if (mKey.vk == TCODK_BACKSPACE)
 	{
 		if (contents.size() > 0)
 		{
 			contents = contents.substr(0, contents.size() - 1);
+			Scroll(0);
 			InSync = false;
 		}
 	}
 	else if (mKey.c && mKey.vk != TCODK_ENTER && mKey.vk != TCODK_KPENTER)
 	{
 		contents += mKey.c;
+		Scroll(100);
 		InSync = false;
 	}
 }
@@ -60,10 +61,9 @@ const std::string& DynamicTextBox::GetContents()
 	return contents;
 }
 
+
 void DynamicTextBox::SetContents(std::vector<std::string> contentsIn)
 {
-	//format shite
-	//Might just not be necessary at all
 	LOGWARN("Attempted to set the contents of a DynamicTextBox");
 }
 
@@ -74,7 +74,6 @@ void DynamicTextBox::AddEntry(std::string newEntry)
 
 void DynamicTextBox::Render()
 {
-	//LOG(std::to_string(startingLine));
 	ResetCursor();
 	RenderFrame();
 	PrintLine(contents);

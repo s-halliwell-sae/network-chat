@@ -55,17 +55,30 @@ void CBE::Run()
 #pragma region TempStuffForTesting
 	std::vector<std::string> fakeUsers;
 
-	fakeUsers.push_back("Tommy");
-	fakeUsers.push_back("Richard");
-	fakeUsers.push_back("Harry");
+	fakeUsers.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
+
+	for (int i = 0; i <= 77; ++i)
+	{
+		fakeUsers.push_back(std::to_string(i));
+	}
+
+	fakeUsers.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
+
+	//LOG(fakeUsers.back());
 
 	mRenderer.SetContents("Users", fakeUsers);
 
 	std::vector<std::string> fakeRooms;
 
-	fakeRooms.push_back("Living Room");
-	fakeRooms.push_back("Bathroom");
-	fakeRooms.push_back("Kitchen");
+	fakeRooms.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
+
+	for (int i = 0; i <= 77; ++i)
+	{
+		fakeRooms.push_back(std::to_string(i));
+	}
+
+	fakeRooms.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
+
 
 	mRenderer.SetContents("Rooms", fakeRooms);
 #pragma endregion DeleteLater
