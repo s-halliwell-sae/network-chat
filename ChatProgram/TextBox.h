@@ -53,6 +53,7 @@ protected:
 	float cursorX;
 	float cursorY;
 
+	void RenderScrollBar();
 	void RenderFrame();
 	void PrintLine(std::string& line);
 	void ResetCursor();
@@ -64,6 +65,8 @@ protected:
 	void SetWindowDimensions();
 
 	int mScrollSpeed;
+
+	int MaxScroll();
 
 private:
 	std::vector<std::string> contents;
