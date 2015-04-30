@@ -89,7 +89,9 @@ void CBE::Run()
 		//UpdateGUI
 		if (mRenderer.PressedEnter())
 		{
-			SubmitTextBox(mRenderer.RetrieveDynamicField());
+			std::string message = mRenderer.RetrieveDynamicField();
+			mRenderer.AddEntry("Chat Log", message);
+			SubmitTextBox(message);
 		}
 		mRenderer.Update();
 	}

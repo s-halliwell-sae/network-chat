@@ -43,7 +43,7 @@ void DynamicTextBox::ProcessInput()
 	else if (mKey.c && mKey.vk != TCODK_ENTER && mKey.vk != TCODK_KPENTER)
 	{
 		contents += mKey.c;
-		Scroll(100);
+		Scroll(LinesOnScreen(contents.length()));
 		InSync = false;
 	}
 }
