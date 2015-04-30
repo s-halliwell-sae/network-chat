@@ -64,10 +64,12 @@ void SocketWrapper::Init()
 	mAddress.sin_port = htons(mPort);
 
 	//Bind
-	if (Bind())
+#ifndef NC_SERVER
+	//if (Bind())
 	{
-		printf("Binding done on port: %i.\n", mPort);
+		//printf("Binding done on port: %i.\n", mPort);
 	}
+#endif
 	mRecvLength = sizeof(mSourceAddress);
 }
 void SocketWrapper::Update()
@@ -81,7 +83,7 @@ void SocketWrapper::Update()
 void SocketWrapper::Close()
 {
 	closesocket(mSocket);
-	WSACleanup();
+	// WSACleanup();
 }
 
 void SocketWrapper::Recieve()
@@ -104,8 +106,7 @@ void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	//address.sin_port = htons(mPort);
-	address.sin_port = htons(40000);
+	address.sin_port = htons(mPort);
 
 	char* buffer = new char[size];
 	memset(buffer, '\0', size);
@@ -120,12 +121,34 @@ void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 	}
 }
 
+#ifdef NC_SERVER
+void SocketWrapper::Send(IPAddress addr, unsigned short port, ABPacket *packet, size_t size)
+{
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = addr.GetIPAddress();
+	address.sin_port = htons(port);
+
+	char* buffer = new char[size];
+	memset(buffer, '\0', size);
+
+	memcpy(buffer, packet, size);
+
+	// Send the packet
+	if (sendto(mSocket, buffer, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
+	{
+		// If there's an error print it (we'll probably also want to log it)
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+	}
+}
+#endif
+
 void SocketWrapper::Send(IPAddress addr, const char* packet)
 {
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	//address.sin_port = htons(40000);
+	address.sin_port = htons(mPort);
 
 	// Send the packet
 	if (sendto(mSocket, packet, strlen(packet)+1, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
@@ -141,8 +164,7 @@ void SocketWrapper::Broadcast()
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = IPAddress("255.255.255.255").GetIPAddress();
-	//address.sin_port = htons(mPort);
-	address.sin_port = htons(40000);
+	address.sin_port = htons(mPort);
 
 	PacketDetectServer* pds = new PacketDetectServer();
 

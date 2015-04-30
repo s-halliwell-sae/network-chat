@@ -33,6 +33,9 @@ public:
 
 		return o << bytes[0] << "." << bytes[1] << "." << bytes[2] << "." << bytes[3];
 	}
+
+	bool compare(const IPAddress& other);
+
 private:
 	unsigned long mIPAddress;
 };

@@ -1,10 +1,12 @@
 #pragma once
+#ifdef NC_SERVER
 
 #include <map>
 #include <string>
 #include <vector>
 
 #include "Room.h"
+#include "SocketWrapper.h"
 #include "User.h"
 
 using std::map;
@@ -18,23 +20,49 @@ class Server
 	Server(const string& name, unsigned short port);
 	~Server();
 
-	void createRoom(const string& name, bool indestructible);
-	void createUser(const string& name);
-	Room* getRoom(const string& room) const;
-	void echoToRoom(const Room& room, const string& message) const;
-	void moveUser(User& user, Room& room);
 	int run();
-	User* getUser(const string& room) const;
 
 	private:
 
-	string		   m_name;
-	PacketHandler* m_packetHandler;
-	unsigned short m_port;
-	bool m_running;
-	SocketWrapper* m_socket;
+	const unsigned int ROOM_TIMEOUT_MS = 60000;
+	const unsigned int USER_TIMEOUT_MS = 60000;
+	const unsigned int UPDATE_RATE    = 200;
 
-	vector<Room*> m_rooms;
-	vector<User*> m_users;
+	void CreateRoom(const string& name, bool indestructible);
+	void CreateUser(const string& name, const IPAddress& ip, unsigned short port);
 
+	void DeleteRoom(Room* room);
+	void DeleteUser(User* user);
+
+	void MoveUser(User* user, Room* room);
+
+	Room* GetRoom(const string& room) const;
+	User* GetUser(const string& name) const;
+	User* GetUser(const IPAddress& ip, unsigned short port) const;
+
+	void SendAcknowledge(const IPAddress& ip, unsigned short port) const;
+	void SendChangeRoomResponse(/* const */ PacketChangeRoom& resp, const IPAddress& ip, unsigned short port) const;
+	void SendChangeUserNameResponse(/* const */ PacketChangeUserName& resp, const IPAddress& ip, unsigned short port) const;
+	void SendConnectServerResponse(/* const */ ConnectToServerResponce& resp, const IPAddress& ip, unsigned short port) const;
+	void SendCreateRoomResponse(/* const */ PacketCreateRoomResponse& resp, const IPAddress& ip, unsigned short port) const;
+	void SendRoomList() const;
+	void SendRoomMessage(/* const */ Room& room, const string& user, const string& msg) const;
+	void SendServerInfo(const IPAddress& ip, unsigned short port) const;
+	void SendUserList(/* const */ Room& room) const;
+
+	void DefaultSend(/* const */ ABPacket& packet, unsigned int size, const IPAddress& ip, unsigned short port) const;
+	
+	bool mRunning;
+
+	string		   mName;
+	unsigned short mPort;
+	SocketWrapper& mSocket;
+
+	vector<Room*> mRooms;
+	vector<User*> mUsers;
+
+	map<Room*, vector<User*>> mRoomUsers;
+	map<User*, Room*>		  mUserInRoom;
 };
+
+#endif

@@ -1,5 +1,4 @@
 #include "Room.h"
-#include <ctime>
 
 Room::Room(std::string roomName)
 {
@@ -38,6 +37,26 @@ void Room::AddUser(User* user)
 {
 	mUsers.push_back(user);
 }
+
+#ifdef NC_SERVER
+
+void Room::RemoveUser(User* user)
+{
+	for (size_t i = 0; i < mUsers.size(); ++i)
+		if (mUsers[i] == user)
+			mUsers.erase(mUsers.begin() + i);
+}
+
+clock_t Room::GetLastContactTime() const
+{
+	return mLastContactTime;
+}
+void Room::SetLastContactTime(clock_t time)
+{
+	mLastContactTime = time;
+}
+
+#endif
 
 std::vector<User*> Room::GetUsers()
 {

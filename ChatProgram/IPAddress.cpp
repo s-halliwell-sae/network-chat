@@ -33,3 +33,8 @@ unsigned long IPAddress::GetIPAddress() const
 {
 	return mIPAddress;
 }
+
+bool IPAddress::compare(const IPAddress& other)
+{
+	return mIPAddress == other.mIPAddress;
+}
