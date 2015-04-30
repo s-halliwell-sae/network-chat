@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "User.h"
+//#include "User.h"
 #include "ServerInfo.h"
 #include "ChatParser.h"
 
@@ -11,7 +11,6 @@
 #include "SocketWrapper.h"
 
 #include "IPAddress.h"
-
 #include "Renderer.h"
 
 class CBE

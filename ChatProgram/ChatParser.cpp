@@ -1,7 +1,7 @@
 #include "ChatParser.h"
 #include <sstream>
 #include <string>
-#include <iostream>
+#include "Logger.h"
 
 ChatParser::ChatParser(std::string chatCommandName, std::string appendCommandName)
 {
@@ -46,7 +46,7 @@ void ChatParser::Parse(std::string chatBox)
 					values.push_back(token);
 					parsed.erase();
 				}
-				std::cout << std::endl << "Executing Found Command";
+				LOG("Executing command " + command);
 				GetCommandManager()->CallFunction(values);
 				return;
 			}
@@ -54,13 +54,11 @@ void ChatParser::Parse(std::string chatBox)
 	}
 	if (GetCommandManager()->FindFunction(mAppendCommand))
 	{
-		std::cout << std::endl << "Trying to Append Colour";
 		values.push_back(parsed);
 		GetCommandManager()->CallFunction(values);
 	}
 	if (GetCommandManager()->FindFunction(mChatCommand))
 	{
-		std::cout << std::endl << "Trying to Send Message";
 		GetCommandManager()->CallFunction(values);
 	}
 }
