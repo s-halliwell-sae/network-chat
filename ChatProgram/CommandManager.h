@@ -7,7 +7,6 @@
 #include <vector>
 
 typedef std::function<void(std::vector<std::string>&)> FunctionPointer;
-//typedef std::function<void(const CBE&, std::string&)> FunctionPointer;
 typedef std::map<std::string, FunctionPointer> function_map;
 
 class CommandManager
