@@ -25,7 +25,9 @@ public:
 	void RemoveUser(User* user);
 	clock_t GetLastContactTime() const;
 	void SetLastContactTime(clock_t time);
+	bool isIndestructible();
 #endif
+
 
 	std::vector<User*> GetUsers();				//Return mUsers
 	std::string GetName();						//Return mRoomName

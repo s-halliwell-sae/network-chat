@@ -16,8 +16,6 @@ std::string User::GetName()
 	return mUsername;
 }
 
-#ifdef NC_SERVER
-
 IPAddress User::GetIP() const
 {
 	return mAddress;
@@ -31,11 +29,6 @@ unsigned short User::GetPort() const
 Room* User::GetRoom() const
 {
 	return mRoom;
-}
-
-clock_t User::GetLastContactTime() const
-{
-	return mLastContactTime;
 }
 
 void User::SetIP(IPAddress add)
@@ -52,10 +45,3 @@ void User::SetRoom(Room* room)
 {
 	mRoom = room;
 }
-
-void User::SetLastContactTime(clock_t time)
-{
-	mLastContactTime = time;
-}
-
-#endif

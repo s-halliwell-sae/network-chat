@@ -18,8 +18,6 @@ Server::Server(const string& name, unsigned short port)
 
 	CreateRoom("Lobby", true);
 	mSocket.Bind();
-
-
 }
 
 int Server::run()
@@ -44,17 +42,23 @@ int Server::run()
 
 					if (senderUser)
 					{
-						SendAcknowledge(senderIP, senderPort);
-
 						Room* senderRoom = senderUser->GetRoom();
 						if (senderRoom != GetRoom("Lobby"))
+						{
+							string logOut = senderUser->GetName() + " sent message: ";
+							logOut.append(ptm.message);
+							LOG(logOut);
+
+							SendAcknowledge(senderIP, senderPort);
 							SendRoomMessage(*senderRoom, senderUser->GetName(), ptm.message);
+						}
 					}
 
 					break;
 				}
 				case PT_DETECT_SERVER:
 				{
+					SendAcknowledge(senderIP, senderPort);
 					SendServerInfo(senderIP, senderPort);
 
 					break;
@@ -67,28 +71,27 @@ int Server::run()
 					{					
 						PacketChangeRoomRequest ptcrr = (PacketChangeRoomRequest&) packet;
 						Room* toRoom = GetRoom(ptcrr.newRoomName);
+						PacketChangeRoom resp = PacketChangeRoom();
+						
+						bool toRoomValid = toRoom != nullptr;
 
-						if (toRoom)
-						{
-							Room* fromRoom = senderUser->GetRoom();
-
-							PacketChangeRoom resp = PacketChangeRoom();
+						if (toRoomValid)
 							strncpy_s(resp.newRoomName, 32, toRoom->GetName().c_str(), 32);
-							SendChangeRoomResponse(resp, senderIP, senderPort);
-
-							MoveUser(senderUser, toRoom);
-
-							SendAcknowledge(senderIP, senderPort);
-							SendChangeRoomResponse(resp, senderIP, senderPort);
-						}
 						else
-						{
-							PacketChangeRoom resp = PacketChangeRoom();
 							strncpy_s(resp.newRoomName, 32, "-1", 32);
 
-							SendAcknowledge(senderIP, senderPort);
-							SendChangeRoomResponse(resp, senderIP, senderPort);
+						SendAcknowledge(senderIP, senderPort);
+						SendChangeRoomResponse(resp, senderIP, senderPort);
+
+						if (toRoomValid)
+						{
+							string logOut = senderUser->GetName() + " moved to: ";
+							logOut.append(toRoom->GetName());
+							LOG(logOut);
+
+							MoveUser(senderUser, toRoom);
 						}
+
 					}
 
 					break;
@@ -106,12 +109,21 @@ int Server::run()
 					}
 					else
 					{
-						user->SetName(ptcunr.newUserName);
-						memcpy(packet_change_name.newUserName, ptcunr.newUserName, 32);
-						
-						SendChangeUserNameResponse(packet_change_name, senderIP, senderPort);
-						SendUserList(*user->GetRoom());
+						string logOut = "Name changed: ";
+						logOut.append(GetUser(senderIP, senderPort)->GetName());
+						logOut += " -> ";
+						logOut.append(ptcunr.newUserName);
+						LOG(logOut);
+
+						GetUser(senderIP, senderPort)->SetName(ptcunr.newUserName);
+						memcpy(packet_change_name.newUserName, ptcunr.newUserName, 32);	
 					}
+
+					SendAcknowledge(senderIP, senderPort);
+					SendChangeUserNameResponse(packet_change_name, senderIP, senderPort);
+
+					if (!user)
+						SendUserList(*GetUser(senderIP, senderPort)->GetRoom());
 
 					break;
 				}
@@ -119,20 +131,14 @@ int Server::run()
 				{
 					PacketCreateRoomRequest ptcrr = (PacketCreateRoomRequest&) packet;
 					PacketCreateRoomResponse resp;
+					resp.wasCreated = GetRoom(ptcrr.newRoomName) == nullptr;
 
-					if (GetRoom(ptcrr.newRoomName))
-					{
-						resp.wasCreated = false;
-						SendAcknowledge(senderIP, senderPort);
-						SendCreateRoomResponse(resp, senderIP, senderPort);
-					}
-					else
+					SendAcknowledge(senderIP, senderPort);
+					SendCreateRoomResponse(resp, senderIP, senderPort);
+
+					if (resp.wasCreated)
 					{
 						CreateRoom(ptcrr.newRoomName, false);
-						resp.wasCreated = true;
-
-						SendAcknowledge(senderIP, senderPort);
-						SendCreateRoomResponse(resp, senderIP, senderPort);
 						SendRoomList();
 					}
 
@@ -143,19 +149,17 @@ int Server::run()
 					ConnectToServerRequest ptcsr = (ConnectToServerRequest&) packet;
 					ConnectToServerResponce resp;
 
-					if (GetUser(ptcsr.Username))
-					{
-						resp.isAccepted = false;
-					}
-					else
-					{
-						resp.isAccepted = true;
-						CreateUser(ptcsr.Username, senderIP, senderPort);
-					}
+					resp.isAccepted = GetUser(ptcsr.Username) == nullptr;
 
 					SendAcknowledge(senderIP, senderPort);
 					SendConnectServerResponse(resp, senderIP, senderPort);
 
+					if (resp.isAccepted)
+					{
+						CreateUser(ptcsr.Username, senderIP, senderPort);
+						SendUserList(*GetRoom("Lobby"));
+					}
+					
 					break;
 				}
 				default:
@@ -165,15 +169,11 @@ int Server::run()
 
 		clock_t currTime = clock();
 
-		for (size_t i = 0; i < mUsers.size(); ++i)
-			if (currTime - mUsers[i]->GetLastContactTime() > USER_TIMEOUT_MS)
-				DeleteUser(mUsers[i]);
-
 		for (size_t i = 0; i < mRooms.size(); ++i)
 		{
 			if (mRooms[i]->GetUsers().size() != 0)
 				mRooms[i]->SetLastContactTime(clock());
-			else if (currTime - mRooms[i]->GetLastContactTime() > ROOM_TIMEOUT_MS)
+			else if (!mRooms[i]->isIndestructible() && currTime - mRooms[i]->GetLastContactTime() > ROOM_TIMEOUT_MS)
 				DeleteRoom(mRooms[i]);
 		}
 
@@ -200,26 +200,34 @@ void SetUserRoom(User& user, /* const */ Room& room)
 
 void Server::CreateRoom(const string& name, bool indestructible)
 {
+	string logOut = "Room created: " + name;
+	LOG(logOut);
+
 	mRooms.push_back(new Room(name, indestructible));
 }
 
 void Server::CreateUser(const string& name, const IPAddress& ip, unsigned short port)
 {
+	string logOut = "User created: " + name;
+	LOG(logOut);
+
 	User* newUser = new User(name);
 
 	newUser->SetIP(ip);
 	newUser->SetUserPort(port);
 	newUser->SetRoom(GetRoom("Lobby"));
-	newUser->SetLastContactTime(clock());
 
 	mUsers.push_back(newUser);
 }
 
 void Server::DeleteRoom(Room* room)
 {
-	for (size_t i = 0; i < mUsers.size(); i++)
+	for (size_t i = 0; i < mRooms.size(); i++)
 		if (mRooms[i] == room)
+		{
+			cout << "DELETED: " << mRooms[i]->GetName() << endl;
 			mRooms.erase(mRooms.begin() + i);
+		}
 
 	SendRoomList();
 
@@ -252,7 +260,7 @@ void Server::MoveUser(User* user, Room* room)
 	SendUserList(*room);
 }
 
-Room* Server::GetRoom(const string& room) const
+Room* const Server::GetRoom(const string& room) const
 {
 	for (size_t i = 0; i < mRooms.size(); ++i)
 		if (mRooms[i]->GetName().compare(room) == 0)
@@ -261,7 +269,7 @@ Room* Server::GetRoom(const string& room) const
 	return nullptr;
 }
 
-User* Server::GetUser(const string& name) const
+User* const Server::GetUser(const string& name) const
 {
 	for (size_t i = 0; i < mUsers.size(); ++i)
 		if (mUsers[i]->GetName().compare(name) == 0)
@@ -270,7 +278,7 @@ User* Server::GetUser(const string& name) const
 	return nullptr;
 }
 
-User* Server::GetUser(const IPAddress& ip, unsigned short port) const
+User* const Server::GetUser(const IPAddress& ip, unsigned short port) const
 {
 	for (size_t i = 0; i < mUsers.size(); ++i)
 		if (mUsers[i]->GetIP().compare(ip) && mUsers[i]->GetPort() == port)
@@ -322,6 +330,7 @@ void Server::SendRoomMessage(/*const*/ Room& room, const string& user, const str
 
 	for (size_t i = 0; i < room.GetUsers().size(); ++i)
 	{
+		cout << room.GetUsers().size() << endl;
 		User* user = room.GetUsers()[i];
 		DefaultSend(packet_message, sizeof(PacketMessage), user->GetIP(), user->GetPort());
 	}

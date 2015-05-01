@@ -239,3 +239,18 @@ unsigned long SocketWrapper::getSenderIP()
 {
 	return mSourceAddress.sin_addr.S_un.S_addr;
 }
+
+unsigned long SocketWrapper::getSocketPort()
+{
+	struct sockaddr_in sin;
+	int addrlen = sizeof(sin);
+	if (getsockname(mSocket, (struct sockaddr *)&sin, &addrlen) == 0 &&
+		sin.sin_family == AF_INET &&
+		addrlen == sizeof(sin))
+	{
+		int local_port = ntohs(sin.sin_port);
+		return local_port;
+	}
+
+	return ntohs(mSourceAddress.sin_port);
+}
