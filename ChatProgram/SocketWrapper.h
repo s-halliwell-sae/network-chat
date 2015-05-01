@@ -49,7 +49,8 @@ public:
 	unsigned short getSenderPort();
 	unsigned long getSenderIP();
 
-	bool Bind();
+	bool Bind(); 
+	unsigned long getSocketPort();
 
 private:
 	// The buffer to temporarily hold data before sending it to a handler

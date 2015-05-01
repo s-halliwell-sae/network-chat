@@ -24,9 +24,8 @@ class Server
 
 	private:
 
-	const unsigned int ROOM_TIMEOUT_MS = 60000;
-	const unsigned int USER_TIMEOUT_MS = 60000;
-	const unsigned int UPDATE_RATE    = 200;
+	const long ROOM_TIMEOUT_MS = 60000;
+	const long UPDATE_RATE = 1;
 
 	void CreateRoom(const string& name, bool indestructible);
 	void CreateUser(const string& name, const IPAddress& ip, unsigned short port);
@@ -36,9 +35,9 @@ class Server
 
 	void MoveUser(User* user, Room* room);
 
-	Room* GetRoom(const string& room) const;
-	User* GetUser(const string& name) const;
-	User* GetUser(const IPAddress& ip, unsigned short port) const;
+	Room* const GetRoom(const string& room) const;
+	User* const GetUser(const string& name) const;
+	User* const GetUser(const IPAddress& ip, unsigned short port) const;
 
 	void SendAcknowledge(const IPAddress& ip, unsigned short port) const;
 	void SendChangeRoomResponse(/* const */ PacketChangeRoom& resp, const IPAddress& ip, unsigned short port) const;
@@ -60,9 +59,6 @@ class Server
 
 	vector<Room*> mRooms;
 	vector<User*> mUsers;
-
-	map<Room*, vector<User*>> mRoomUsers;
-	map<User*, Room*>		  mUserInRoom;
 };
 
 #endif

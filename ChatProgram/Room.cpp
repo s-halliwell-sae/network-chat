@@ -55,6 +55,10 @@ void Room::SetLastContactTime(clock_t time)
 {
 	mLastContactTime = time;
 }
+bool Room::isIndestructible()
+{
+	return mIndestructible;
+}
 
 #endif
 
@@ -62,3 +66,4 @@ std::vector<User*> Room::GetUsers()
 {
 	return mUsers;
 }
+
