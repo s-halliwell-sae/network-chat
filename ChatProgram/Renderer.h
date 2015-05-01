@@ -26,6 +26,8 @@ public:
 
 private:
 
+	TCODColor GetColour(std::string colName);
+
 	void ProcessScroll();
 
 	void RenderAll();

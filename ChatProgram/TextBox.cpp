@@ -24,6 +24,7 @@ TextBox::TextBox(float posX, float posY, float width, float height, int scrollSp
 	ResetCursor();
 	SetWindowDimensions();
 	mScrollSpeed = scrollSpeed;
+	LOG("Cons");
 }
 
 TextBox::TextBox(float posX, float posY, float width, float height, std::string title, std::string prefixIn) //: x(posX), y(posY), h(height), w(width), name(title)
@@ -37,6 +38,7 @@ TextBox::TextBox(float posX, float posY, float width, float height, std::string 
 	prefix = prefixIn;
 	SetWindowDimensions();
 	mScrollSpeed = 1;
+	LOG("Cons");
 }
 
 TextBox::TextBox(float posX, float posY, float width, float height, int scrollSpeed, std::string title, std::string prefixIn) //: x(posX), y(posY), h(height), w(width), name(title)
@@ -50,6 +52,7 @@ TextBox::TextBox(float posX, float posY, float width, float height, int scrollSp
 	prefix = prefixIn;
 	SetWindowDimensions();
 	mScrollSpeed = scrollSpeed;
+	LOG("Cons");
 }
 
 TextBox::~TextBox()
@@ -57,10 +60,13 @@ TextBox::~TextBox()
 	
 }
 
+//Display the contents of the GUI Element
 void TextBox::Render()
 {
+	//Move the "printing point" to the start of the box
 	ResetCursor();
 	RenderFrame();
+	//Print out the contents of the TextBox
 	for each(std::string line in contents)
 	{
 		PrintLine(line);
@@ -77,10 +83,13 @@ void TextBox::RenderFrame()
 	RenderScrollBar();
 }
 
+//Calculate the necessity, size and position of the scroll bar, then render it to the screen
 void TextBox::RenderScrollBar()
 {
+	//Find what percentage of the TextBox the scroll bar should take up and convert it to on-screen positions
 	int scrollBarLength = (h - 4) * (((h - 4) / ((NumLines() == 0) ? 1 : NumLines())));
 
+	//Makes sure the scroll bar isn't rendered as larger than the TextBox or smaller than one TCOD character
 	if (scrollBarLength > h - 4)
 	{
 		scrollBarLength = h - 4;
@@ -90,8 +99,7 @@ void TextBox::RenderScrollBar()
 		scrollBarLength = 1;
 	}
 
-	//LOG(name + ", " + std::to_string(h - 4) + ", " + std::to_string(scrollBarLength));
-
+	//Find the maximum scrolling value
 	int max = NumLines();
 	max -= (h - 4);
 	if (max < 0)
@@ -99,14 +107,21 @@ void TextBox::RenderScrollBar()
 		max = 0;
 	}
 
+	//Lerp between the minimum printing position and the maximum printing position within the TextBox 
+	//based on the percentage through the content the user has currently scrolled
 	int printBuf = LERP(0, h - 4 - scrollBarLength, float(startingLine) / float(max));
 
-	for (int i = 0; i < scrollBarLength; ++i)
+	//If there is enough content to render a scroll bar
+	if (printBuf >= 0)
 	{
-		TCODConsole::root->print(x + w - 2, y + 3 + i + printBuf, "|");
+		for (int i = 0; i < scrollBarLength; ++i)
+		{
+			TCODConsole::root->print(x + w - 2, y + 3 + i + printBuf, "|");
+		}
 	}
 }
 
+//Empties the TextBox and resets all relevant Data
 void TextBox::Clear()
 {
 	contents.clear();
@@ -223,7 +238,7 @@ int TextBox::LinesOnScreen(int contentLength)
 
 bool TextBox::Collision(int x, int y)
 {
-	if (float(x) >= mWB.minX && float(x) <= mWB.maxX && float(y) >= mWB.minY && float(y) <= mWB.maxY)
+	if (float(x) > mWB.minX && float(x) < mWB.maxX && float(y) > mWB.minY && float(y) < mWB.maxY)
 	{
 		//LOG(name);
 		return true;
@@ -237,7 +252,6 @@ void TextBox::SetWindowDimensions()
 	mWB.minY = y * 8;
 	mWB.maxX = mWB.minX + (w * 8);
 	mWB.maxY = mWB.minY + (h * 8);
-	//LOG(name + ": " + std::to_string(mWB.minX) + " to " + std::to_string(mWB.maxX) + ", " + std::to_string(mWB.minY) + " to " + std::to_string(mWB.maxY));
 }
 
 int TextBox::MaxScroll()

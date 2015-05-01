@@ -65,9 +65,7 @@ void Renderer::SetupLayout(GUILayout style)
 	int frameRate = 25;
 	IniManager::getInstance().GetInt("frameRate", frameRate);
 	TCODSystem::setFps(frameRate);
-	TCODConsole::root->setDefaultForeground(TCODColor(255, 0, 0));
-	TCODConsole::root->setDefaultBackground(TCODColor(0, 0, 0));
-	
+
 	//Get a handle of the new TCOD window
 	hwnd = FindWindow(NULL, "Client");
 
@@ -86,10 +84,14 @@ void Renderer::SetupLayout(GUILayout style)
 	}
 	else if (style == GUILayout::CLIENT_CONNECTED)
 	{
+		//Pull the desired colors from the Config file
+		TCODConsole::root->setDefaultForeground(GetColour("foreground"));
+		TCODConsole::root->setDefaultBackground(GetColour("background"));
+
+		//Setup the GUI elements
 		mRenderables.push_back(new TextBox(int(resX * 0.15) * 2 - 1, 1, resX - int(resX * 0.15) * 2, int(resY * 0.8), 3, "Chat Log", "Callan: "));
 		mRenderables.push_back(new TextBox(int(resX * 0.15), 1, int(resX * 0.15), int(resY * 0.8), 2, "Users", "- "));
 		mRenderables.push_back(new TextBox(1, 1, int(resX * 0.15), int(resY * 0.8), 2, "Rooms", "- "));		
-
 		mDynamicField = new DynamicTextBox(1, int(resY * 0.8), resX - 2, int(resY * 0.2) - 1, "Input Field");
 		mRenderables.push_back(mDynamicField);
 	}
@@ -103,19 +105,25 @@ void Renderer::SetupLayout(GUILayout style)
 	}
 }
 
+//Find the RGB values stored in the Config file corresponding to the colour name given
+TCODColor Renderer::GetColour(std::string colName)
+{
+	int r = 0;
+	int g = 0;
+	int b = 0;
+
+	if (IniManager::getInstance().GetInt(colName + "r", r) && IniManager::getInstance().GetInt(colName + "g", g) && IniManager::getInstance().GetInt(colName + "b", b))
+	{
+		return TCODColor(CLAMP(0, 255, r), CLAMP(0, 255, g), CLAMP(0, 255, b));
+	}
+
+	LOGWARN("Values associated with colour: " + colName + " couldn't be found/used.");
+
+	return TCODColor(0, 0, 0);
+}
+
 void Renderer::Update()
 {
-
-	/*POINT p;
-
-	if (GetCursorPos(&p))
-	{
-		if (ScreenToClient(hwnd, &p))
-		{
-			LOG("X: " + std::to_string(p.x) + ", Y: " + std::to_string(p.y));
-		}
-	}*/
-
 	//Handle inputs detected this frame
 	ProcessScroll();
 	mDynamicField->ProcessInput();
@@ -143,7 +151,8 @@ bool Renderer::SetContents(std::string key, std::vector<std::string> newContents
 	return false;
 }
 
-//Add a new element to 
+//Add a new element to a TextBox
+//Note: A dynamic text box cannot have entries added to it
 bool Renderer::AddEntry(std::string key, std::string newEntry)
 {
 	for each (TextBox* box in mRenderables)
@@ -158,6 +167,8 @@ bool Renderer::AddEntry(std::string key, std::string newEntry)
 	return false;
 }
 
+//Returns true if enter was pressed this frame, false otherwise
+//Used to prevent User from having to access Windows Message Pump
 bool Renderer::PressedEnter()
 {
 	TCOD_key_t *key = mDynamicField->GetKey();
@@ -172,23 +183,28 @@ bool Renderer::PressedEnter()
 	}
 }
 
+//Finds if the mouse is within the Window, then finds the GUI element (if any) that it is hovering over
 void Renderer::ProcessScroll()
 {
+	//If we've scrolled
 	if (scrollThisFrame != 0)
 	{
+		//Get cursor position, translate it to local space (Within the window)
 		POINT p;
 
 		if (GetCursorPos(&p))
 		{
 			if (ScreenToClient(hwnd, &p))
 			{
-				if ((p.x >= 0 && p.x <= windowY) && (p.y >= 0 && p.y <= windowY))
+				//If the cursor is within the window
+				if ((p.x > 0 && p.x < windowX) && (p.y > 0 && p.y < windowY))
 				{
 					for each (TextBox* box in mRenderables)
 					{
+						//Check if the mouse is over a given box
 						if (box->Collision(p.x, p.y))
 						{
-							//LOG(box->GetName());
+							//Scroll the box, reset the scroll for the next frame
 							box->Scroll(scrollThisFrame);
 							scrollThisFrame = 0;
 							return;
@@ -197,9 +213,13 @@ void Renderer::ProcessScroll()
 				}
 			}
 		}
+		//If the user scrolled but wasn't hovered over anything at the time, the scroll is reset
+		scrollThisFrame = 0;
 	}
 }
 
+//Get the contents of the active dynamic field
+//There can be only one dynamic field at a time, so this can be a simple function
 std::string Renderer::RetrieveDynamicField()
 {
 	std::string temp = mDynamicField->GetContents();
@@ -208,6 +228,7 @@ std::string Renderer::RetrieveDynamicField()
 	return temp;
 }
 
+//Check to see if a TextBox has had any changes made to it that would warrant a re-render
 bool Renderer::CheckForChanges()
 {
 	for each (TextBox* box in mRenderables)
@@ -231,6 +252,7 @@ void Renderer::RenderAll()
 	TCODConsole::root->flush();
 }
 
+//Used to access the Windows Message Pump
 LRESULT CALLBACK CustomWindProc(
 	_In_ HWND   hwnd,
 	_In_ UINT   uMsg,
