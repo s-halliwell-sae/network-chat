@@ -1,8 +1,8 @@
 #include "CBE.h"
 
-//#ifdef NC_SERVER
+#ifdef NC_SERVER
 
-/*
+
 #include "Server.h"
 
 const u_short g_Port = 40000;
@@ -14,18 +14,19 @@ int main()
 	return server.run();
 }
 
-//#elif defined NC_CLIENT
-*/
+#elif defined NC_CLIENT
+
 #include "CBE.h"
 
-
+/*
 int main()
 {
 	CBE program = CBE();
 	program.Run();
 	return 0;
 }
-/*
+*/
+
 int main()
 {
 	srand(time(NULL));
@@ -78,8 +79,8 @@ int main()
 	}
 	return 0;
 }
-*/
-//#endif
+
+#endif
 
 /*
 #include "Logger.h"

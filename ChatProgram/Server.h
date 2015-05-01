@@ -7,6 +7,7 @@
 
 #include "Room.h"
 #include "SocketWrapper.h"
+#include "Renderer.h"
 #include "User.h"
 
 using std::map;
@@ -25,7 +26,7 @@ class Server
 	private:
 
 	const long ROOM_TIMEOUT_MS = 60000;
-	const long UPDATE_RATE = 1;
+	const long UPDATE_RATE = 16;
 
 	void CreateRoom(const string& name, bool indestructible);
 	void CreateUser(const string& name, const IPAddress& ip, unsigned short port);
@@ -39,6 +40,8 @@ class Server
 	User* const GetUser(const string& name) const;
 	User* const GetUser(const IPAddress& ip, unsigned short port) const;
 
+	void ChangeCurrentRoom(Room* room);
+
 	void SendAcknowledge(const IPAddress& ip, unsigned short port) const;
 	void SendChangeRoomResponse(/* const */ PacketChangeRoom& resp, const IPAddress& ip, unsigned short port) const;
 	void SendChangeUserNameResponse(/* const */ PacketChangeUserName& resp, const IPAddress& ip, unsigned short port) const;
@@ -50,8 +53,15 @@ class Server
 	void SendUserList(/* const */ Room& room) const;
 
 	void DefaultSend(/* const */ ABPacket& packet, unsigned int size, const IPAddress& ip, unsigned short port) const;
+
+	void UpdateChatGUI();
+	void UpdateRoomGUI();
+	void UpdateUserGUI();
+
+	void ProcessCommand(string cmd);
 	
-	bool mRunning;
+	bool	 mRunning;
+	Renderer mRenderer;
 
 	string		   mName;
 	unsigned short mPort;
@@ -59,6 +69,9 @@ class Server
 
 	vector<Room*> mRooms;
 	vector<User*> mUsers;
+
+	Room*		   mCurrRoom;
+	vector<string> mCurrRoomChat;
 };
 
 #endif
