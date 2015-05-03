@@ -1,0 +1,44 @@
+#include iostream
+#include SocketWrapper.h
+#include Packets.h
+#include IPAddress.h
+int main()
+{
+	IPAddress IP = IPAddress(127.0.0.1);
+	IPAddress sendIP = IPAddress(127.0.0.1);
+	IPAddress brokenIP = IPAddress(128.0.0.1);
+	SocketWrapper sock;
+	if (sock.Bind())
+	{
+		stdcout  Binding donen;
+	}
+	
+	PacketMessage msg1;
+	msg1.SetMessage(This is a message from ASDF.);
+	msg1.SetUserName(ASDF);
+	PacketMessage msg2;
+	msg2.SetMessage(This is a message from FDSA.);
+	msg2.SetUserName(FDSA);
+	ABPacket message1 = &msg1;
+	ABPacket message2 = &msg2;
+
+	PacketHandler handler(&sock);
+	handler.AssignAsClient();
+	sock.Broadcast();
+
+	sock.Update();
+	handler.Update();
+
+	sock.Update();
+	handler.Update();
+
+	sock.Send(sendIP, message1, sizeof(PacketMessage));
+	sock.Send(brokenIP, message2, sizeof(PacketMessage));
+
+	while (1)
+	{
+		sock.Update();
+		handler.Update();
+	}
+	return 0;
+}

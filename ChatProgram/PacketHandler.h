@@ -36,8 +36,18 @@ public:
 
 	time_t GetLastPacketTime();
 
+	// Allows you to add the function to packethandler externally
+	// Will remove from map then add if the packetType is already in use
+	void AddFunctionToMap(std::function<void()> func, PacketType packetType);
 	void AssignAsClient();
 	void AssignAsServer();
+
+	void PushPending(IPAddress addr, ABPacket* pack, size_t size);
+
+	void SetPacketNumber(unsigned short packetNumber);
+	unsigned short GetPacketNumber();
+
+	std::vector<Pending*>* GetPendingAcks();
 private:
 	#pragma region PacketFunctions
 	void Acknowledge();
@@ -63,17 +73,19 @@ private:
 
 	void ConnectToserver();
 	void ConnectToserverRequest();
-
 	#pragma endregion
 
 	SocketWrapper* mSocket;
 
 	ABPacket* mCurrentPacket;
+	IPAddress mLatestAddress;
 
 	// Current packet number (loop around)
-	short mPacketNumber = 0;
+	unsigned short mPacketNumber = 0;
 	// Queue of packets that are awaiting an acknowledge
-	std::vector<Pending> mPendingAcks;
+	std::vector<Pending*> mPendingAcks;
+	// Number of times to attempt resending packets
+	int mMaxResendAttempts = 10;
 
 	// Used for calculating packet loss
 	uint mNumPacketsSent = 0;
@@ -84,6 +96,8 @@ private:
 
 	// Last packet recieved
 	time_t mLastPacketTime;
+
+
 };
 
 #endif PACKET_HANDLER_H

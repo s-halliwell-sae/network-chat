@@ -32,10 +32,10 @@ public:
 	void Recieve();
 	// Send a packet to the address
 	void Send(IPAddress addr, ABPacket *packet, size_t size);
+	void Resend(IPAddress addr, ABPacket *packet, size_t size);
 #ifdef NC_SERVER
 	void Send(IPAddress addr, unsigned short port, ABPacket *packet, size_t size);
 #endif
-	void Send(IPAddress addr, const char* packet);
 	// Broadcast to find servers
 	void Broadcast();
 
@@ -54,9 +54,8 @@ public:
 
 private:
 	// The buffer to temporarily hold data before sending it to a handler
-	char* mBuffer;
-	ABPacket* mLatestPacket;
-
+	ABPacket* mLatestSent;
+	ABPacket* mLatestRecieved;
 	PacketHandler* mHandler;
 
 	// Data that is relevant to the WINSOCK socket setup process and dealing with

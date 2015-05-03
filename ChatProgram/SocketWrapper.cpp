@@ -63,19 +63,14 @@ void SocketWrapper::Init()
 	mAddress.sin_addr.s_addr = mIPAddress;
 	mAddress.sin_port = htons(mPort);
 
-	//Bind
-#ifndef NC_SERVER
-	//if (Bind())
-	{
-		//printf("Binding done on port: %i.\n", mPort);
-	}
-#endif
 	mRecvLength = sizeof(mSourceAddress);
 }
 void SocketWrapper::Update()
 {
 	if (CheckForWaitingData())
 	{
+		// Recieve data
+		Recieve();
 		// If there is a packet waiting, proceed to send that to the packethandler
 		SendToHandler();
 	}
@@ -98,9 +93,31 @@ void SocketWrapper::Recieve()
 		// If there's an error print it (we'll probably also want to log it)
 		std::cout << "recvfrom() failed: Error " << WSAGetLastError() << std::endl;
 	}
-	mLatestPacket = (ABPacket*)buffer;
+	mLatestRecieved = (ABPacket*)buffer;
+//	std::cout << "mLatestRecieved: " << mLatestRecieved->mPacketNumber << '\n';
 }
 
+void SocketWrapper::Resend(IPAddress addr, ABPacket *packet, size_t size)
+{
+	struct sockaddr_in address;
+	address.sin_family = AF_INET;
+	address.sin_addr.s_addr = addr.GetIPAddress();
+	address.sin_port = htons(mPort);
+
+	//std::cout << "pn: " << packet->mPacketNumber << " pn2: " << mHandler->GetPacketNumber() << std::endl;
+	mLatestSent = packet;
+
+	// Set the contents of the packet
+	char* buffer = new char[size];
+	memset(buffer, '\0', size);
+	memcpy(buffer, packet, size);
+	// Send the packet
+	if (sendto(mSocket, buffer, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
+	{
+		// If there's an error print it (we'll probably also want to log it)
+		printf("sendto() failed with error code : %d", WSAGetLastError());
+	}
+}
 void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 {
 	struct sockaddr_in address;
@@ -108,11 +125,25 @@ void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 	address.sin_addr.s_addr = addr.GetIPAddress();
 	address.sin_port = htons(mPort);
 
+
+
+	if (packet->mPacketType != PT_ACKNOWLEDGE)
+	{
+		packet->mPacketNumber = mHandler->GetPacketNumber();
+		packet->mPacketNumber++;
+
+		mHandler->SetPacketNumber(packet->mPacketNumber);
+
+		mHandler->PushPending(addr, packet, size);
+	}
+
+	//std::cout << "pn: " << packet->mPacketNumber << " pn2: " << mHandler->GetPacketNumber() << std::endl;
+	mLatestSent = packet;
+
+	// Set the contents of the packet
 	char* buffer = new char[size];
 	memset(buffer, '\0', size);
-
 	memcpy(buffer, packet, size);
-
 	// Send the packet
 	if (sendto(mSocket, buffer, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
 	{
@@ -143,22 +174,6 @@ void SocketWrapper::Send(IPAddress addr, unsigned short port, ABPacket *packet, 
 }
 #endif
 
-void SocketWrapper::Send(IPAddress addr, const char* packet)
-{
-	struct sockaddr_in address;
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(mPort);
-
-	// Send the packet
-	if (sendto(mSocket, packet, strlen(packet)+1, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
-	{
-		// If there's an error print it (we'll probably also want to log it)
-		printf("sendto() failed with error code : %d", WSAGetLastError());
-	}
-	printf("sent: %s %c", packet, '\n');
-}
-
 void SocketWrapper::Broadcast()
 {
 	struct sockaddr_in address;
@@ -169,6 +184,11 @@ void SocketWrapper::Broadcast()
 	PacketDetectServer* pds = new PacketDetectServer();
 
 	ABPacket* packet = (ABPacket*)pds;
+
+	packet->mPacketNumber = 0;
+
+	mHandler->SetPacketNumber(packet->mPacketNumber);
+	//std::cout << "Sending: " << packet->mPacketType << '\n';
 
 	size_t size = sizeof(PacketDetectServer);
 
@@ -196,8 +216,6 @@ bool SocketWrapper::CheckForWaitingData()
 	// If there is a packet, recvfrom it in the Recieve() function.
 	if (select(NULL, &mCheckSockets, NULL, NULL, &t) > 0)
 	{
-		// Recieve data
-		Recieve();
 		// Return true to inform that data has been received
 		return true;
 	}
@@ -211,7 +229,7 @@ void SocketWrapper::PopWaitingData()
 
 void SocketWrapper::SendToHandler()
 {
-	mHandler->PushPacket(mLatestPacket);
+	mHandler->PushPacket(mLatestRecieved);
 }
 
 bool SocketWrapper::Bind()
@@ -227,7 +245,7 @@ bool SocketWrapper::Bind()
 
 ABPacket* SocketWrapper::getLatestPacket()
 {
-	return mLatestPacket;
+	return mLatestSent;
 }
 
 unsigned short SocketWrapper::getSenderPort()

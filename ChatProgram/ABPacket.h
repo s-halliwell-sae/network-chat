@@ -1,6 +1,8 @@
 #ifndef AB_PACKET_H
 #define AB_PACKET_H
 
+#include <iostream>
+
 enum PacketType
 {
 	PT_ACKNOWLEDGE,

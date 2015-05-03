@@ -21,11 +21,54 @@ PacketHandler::~PacketHandler()
 
 void PacketHandler::Update()
 {
-
+	for (int i = 0; i < mPendingAcks.size(); ++i)
+	{
+		if (mPendingAcks[i]->GetTimeStamp() < time(0) - 1)
+		{
+			if (mPendingAcks[i]->GetAttempts() >= mMaxResendAttempts)
+			{
+				std::cout << "Packet was not acknowledged after " << mMaxResendAttempts << " attempts.\n";
+				mPendingAcks.erase(mPendingAcks.begin() + i);
+			}
+			else
+			{
+				std::cout << "trying to send " << mPendingAcks[i]->GetPacket()->mPacketNumber << ", Attempt: " << mPendingAcks[i]->GetAttempts() << '\n';
+				mSocket->Resend(mPendingAcks[i]->GetAddress(), mPendingAcks[i]->GetPacket(), mPendingAcks[i]->GetSize());
+				mPendingAcks[i]->TrySend();
+				return;
+			}
+		}
+	}
 }
+void PacketHandler::SetPacketNumber(unsigned short packetNumber)
+{
+	mPacketNumber = packetNumber;
+}
+unsigned short PacketHandler::GetPacketNumber()
+{
+	return mPacketNumber;
+}
+
+void PacketHandler::PushPending(IPAddress addr, ABPacket* pack, size_t size)
+{
+	mPendingAcks.push_back(new Pending(pack));
+	mPendingAcks.back()->SetAddress(addr);
+	mPendingAcks.back()->SetSize(size);
+	mPendingAcks.back()->SetPacketNumber(pack->mPacketNumber);
+}
+
+std::vector<Pending*>* PacketHandler::GetPendingAcks()
+{
+	return &mPendingAcks;
+}
+
 void PacketHandler::SendAck()
 {
-
+	PacketAcknowledge* ack = new PacketAcknowledge();
+	ABPacket* pack = (ABPacket*)ack;
+	std::cout << "Send Ack number: " << mCurrentPacket->mPacketNumber << '\n';
+	ack->mPacketNumber = mCurrentPacket->mPacketNumber;
+	mSocket->Send(mLatestAddress, pack, sizeof(PacketAcknowledge));
 }
 
 uint PacketHandler::GetNumPacketsSent()
@@ -50,11 +93,25 @@ time_t PacketHandler::GetLastPacketTime()
 void PacketHandler::PushPacket(ABPacket* pack)
 {
 	// Temporarily save the current packet
-	mCurrentPacket = pack;		 	mCurrentPacket = pack;
+	mCurrentPacket = pack;
+	
 	// Find the relvant function based on current packets type
 	std::function<void()> f = mPacketReceiveCallbacks.at(mCurrentPacket->mPacketType);
 	// Call the function.
 	f();
+	if (pack->mPacketType != PT_ACKNOWLEDGE)
+	{
+//		std::cout << "Packet Number in PushPacket: " << pack->mPacketNumber << '\n';
+		SendAck();
+	}
+}
+// Bind functions to the map externally
+void PacketHandler::AddFunctionToMap(std::function<void()> func, PacketType packetType)
+{
+	std::function<void()> f = std::bind(func);
+	mPacketReceiveCallbacks.erase(packetType);
+
+	mPacketReceiveCallbacks.insert(std::pair<PacketType, std::function<void()>>(packetType, f));
 }
 
 // The function that assigns the client specific functions to the callback map
@@ -155,7 +212,20 @@ void PacketHandler::AssignAsServer()
 #pragma region Packet Functions
 void PacketHandler::Acknowledge()
 {
-	std::cout << "Ack recieved" << std::endl;
+//	std::cout << "Rec ACK PK num: " << mCurrentPacket->mPacketNumber << '\n';
+	PacketAcknowledge* pk = (PacketAcknowledge*)mCurrentPacket;
+//	std::cout << "Ack recieved: " << pk->mPacketNumber << std::endl;
+
+//	std::cout << "mPendingAcks.size(): " << mPendingAcks.size() << '\n';
+
+	for (int i = 0; i < mPendingAcks.size(); ++i)
+	{
+		if (pk->mPacketNumber == mPendingAcks[i]->GetPacketNumber())
+		{
+			mPendingAcks.erase(mPendingAcks.begin() + i);
+		}
+	}
+//	std::cout << '\n';
 }
 
 void PacketHandler::Heartbeat()
@@ -168,33 +238,22 @@ void PacketHandler::CMessage()
 {
 	PacketMessage* pk = (PacketMessage*)mCurrentPacket;
 	std::cout << pk->userName << ": " << pk->message << std::endl;
-	ABPacket* ack = new PacketAcknowledge();
-	// Change to relevant IP address
-	mSocket->Send(IPAddress("127.0.0.1"), ack, sizeof(PacketAcknowledge));
 }
 
 // Bind this message function if server
 void PacketHandler::SMessage()
 {
-	ABPacket* ack = new PacketAcknowledge();
-	// Change to relevant IP address
-	mSocket->Send(IPAddress("127.0.0.1"), ack, sizeof(PacketAcknowledge));
+	PacketMessage* pk = (PacketMessage*)mCurrentPacket;
+
 }
 
 void PacketHandler::DetectServer()
 {
-	std::cout << "Recieved Broadcast\n";
-	ABPacket* ack = new PacketAcknowledge();
-	// Change to relevant IP address
-	mSocket->Send(IPAddress("127.0.0.1"), ack, sizeof(PacketAcknowledge));
+	std::cout << "Rec BC PK num: " << mCurrentPacket->mPacketNumber << '\n';
 }
 void PacketHandler::ServerInfo()
 {
 	std::cout << "Recieved ServerInfo\n";
-	ABPacket* ack = new PacketAcknowledge();
-	// Change to relevant IP address
-	mSocket->Send(IPAddress("127.0.0.1"), ack, sizeof(PacketAcknowledge));
-	// Send server info packet
 }
 
 
