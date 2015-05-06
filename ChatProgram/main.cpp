@@ -2,18 +2,16 @@
 
 #ifdef NC_SERVER
 
+
 #include "Server.h"
 
-const unsigned short g_Port = 40000;
+const u_short g_Port = 40000;
 
 int main()
 {
-	Server server("Test Chat Server", g_Port);
+	Server server("TestServer", g_Port);
 
-	int run = server.run();
-	WSACleanup();
-
-	return run;
+	return server.run();
 }
 
 #elif defined NC_CLIENT
@@ -31,10 +29,11 @@ int main()
 
 int main()
 {
-	srand((unsigned int) time(NULL));
+	srand(time(NULL));
 	IPAddress IP = IPAddress("127.0.0.1");
 	IPAddress sendIP = IPAddress("127.0.0.1");
 	SocketWrapper sock(sendIP, 40000);
+	//sock.Bind();
 
 	PacketHandler handler(&sock);
 	handler.AssignAsClient();
@@ -44,8 +43,7 @@ int main()
 
 	LOG("conn");
 	ConnectToServerRequest packet_conn;
-	std::string user = std::to_string(sock.getSocketPort());
-	strncpy_s(packet_conn.Username, 32, user.c_str(), 32);
+	strncpy_s(packet_conn.Username, 32, std::to_string(rand()).c_str(), 32);
 	sock.Send(sendIP, (ABPacket*) &packet_conn, sizeof(ConnectToServerRequest));
 
 	LOG("create");
@@ -64,11 +62,6 @@ int main()
 	msg.SetUserName("ASDF");
 	ABPacket* message = &msg;
 
-	LOG("change");
-	PacketChangeUserNameRequest req;
-	strncpy_s(req.newUserName, 32, "NewName", 32);
-	sock.Send(sendIP, (ABPacket*) &req, sizeof(PacketChangeUserNameRequest));
-	LOG(std::to_string(sock.getSocketPort()));
 	///<<<<<<< HEAD
 	sock.Send(sendIP, message, sizeof(PacketMessage));
 
