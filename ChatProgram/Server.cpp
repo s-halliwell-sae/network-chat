@@ -51,7 +51,7 @@ int Server::run()
 					if (senderUser)
 					{
 						Room* senderRoom = senderUser->GetRoom();
-						if (senderRoom != GetRoom("Lobby"))
+						//if (senderRoom != GetRoom("Lobby"))
 						{
 							string logOut = senderUser->GetName() + " sent message: ";
 							logOut.append(ptm.message);
@@ -242,6 +242,9 @@ void Server::CreateUser(const string& name, const IPAddress& ip, unsigned short 
 	newUser->SetIP(ip);
 	newUser->SetUserPort(port);
 	newUser->SetRoom(GetRoom("Lobby"));
+	
+	//Need to add users to room
+	GetRoom("Lobby")->AddUser(newUser);
 
 	mUsers.push_back(newUser);
 }
@@ -284,6 +287,9 @@ void Server::MoveUser(User* user, Room* room)
 	lastRoom->RemoveUser(user);
 	user->SetRoom(room);
 	user->GetRoom()->AddUser(user);
+
+	//Need to add users to room
+	room->AddUser(user);
 
 	SendUserList(*lastRoom);
 	SendUserList(*room);

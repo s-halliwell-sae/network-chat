@@ -171,6 +171,8 @@ void PacketHandler::CMessage()
 	ABPacket* ack = new PacketAcknowledge();
 	// Change to relevant IP address
 	mSocket->Send(IPAddress("127.0.0.1"), ack, sizeof(PacketAcknowledge));
+	// Tell the client it recieved a message
+	mClientMessageCallback(pk->userName, pk->message);
 }
 
 // Bind this message function if server

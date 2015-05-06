@@ -10,7 +10,7 @@
 
 CBE::CBE()
 {
-//	mServer = new User("WAITINGFORSERVER");
+	//	mServer = new User("WAITINGFORSERVER");
 	mParser = ChatParser(mChatCommand, mAppendCommand);
 
 	FunctionPointer fp;
@@ -33,12 +33,20 @@ CBE::CBE()
 	mParser.GetCommandManager()->AddFunction(mChatCommand, fp);
 
 	//AppendColour
+	fp = std::bind(&CBE::JoinServer, this, std::placeholders::_1);
+	mParser.GetCommandManager()->AddFunction("/joinserver", fp);
+
+	//Connect to server
 	fp = std::bind(&CBE::AppendColour, this, std::placeholders::_1);
 	mParser.GetCommandManager()->AddFunction(mAppendCommand, fp);
 
-	mPacketHandler = PacketHandler(&mSocket);
-
 	SetServerAddr(IPAddress("127.0.0.1"));
+
+	mSocket = new SocketWrapper(mServerAddr, 40000);
+	mPacketHandler = new PacketHandler(mSocket);
+	mPacketHandler->AssignAsClient();
+
+	BroadcastForServers(std::vector<std::string>());
 };
 CBE::~CBE()
 {
@@ -52,36 +60,21 @@ void CBE::Run()
 	IniManager::getInstance().Init("Config/config.ini");
 	mRenderer.SetupLayout(Renderer::CLIENT_CONNECTED);
 
-#pragma region TempStuffForTesting
-	std::vector<std::string> fakeUsers;
 
-	fakeUsers.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
-
-	for (int i = 0; i <= 77; ++i)
-	{
-		fakeUsers.push_back(std::to_string(i));
-	}
-
-	fakeUsers.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
-
-	//LOG(fakeUsers.back());
-
-	mRenderer.SetContents("Users", fakeUsers);
-
-	std::vector<std::string> fakeRooms;
-
-	fakeRooms.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
-
-	for (int i = 0; i <= 77; ++i)
-	{
-		fakeRooms.push_back(std::to_string(i));
-	}
-
-	fakeRooms.push_back("111111111111111111111111222222222222222222222233333333333333333333333344444444444444444444444444445555555555555555555555556666666666666666666666");
+	mPacketHandler->SetClientMessageCallback(std::bind(&CBE::RecieveMessage, this, std::placeholders::_1, std::placeholders::_2));
+	mPacketHandler->SetClientUpdateRoomListCallback(std::bind(&CBE::SetRooms, this, std::placeholders::_1));
 
 
-	mRenderer.SetContents("Rooms", fakeRooms);
-#pragma endregion DeleteLater
+	//IPAddress sendIP = IPAddress("127.0.0.1");
+	//SocketWrapper sock(sendIP, 40000);
+	//PacketHandler handler(&sock);
+	//handler.AssignAsClient();
+	//LOG("conn");
+	//ConnectToServerRequest packet_conn;
+	//strncpy_s(packet_conn.Username, 32, std::to_string(rand()).c_str(), 32);
+	//sock.Send(sendIP, (ABPacket*)&packet_conn, sizeof(ConnectToServerRequest));
+
+
 	//Main loop
 	while (!TCODConsole::isWindowClosed())
 	{
@@ -90,7 +83,8 @@ void CBE::Run()
 		if (mRenderer.PressedEnter())
 		{
 			std::string message = mRenderer.RetrieveDynamicField();
-			//DEBUGGING: mRenderer.AddEntry("Chat Log", message);
+
+			//mRenderer.AddEntry("Chat Log", message);
 			SubmitTextBox(message);
 		}
 		mRenderer.Update();
@@ -99,14 +93,14 @@ void CBE::Run()
 
 void CBE::Update()
 {
-	mSocket.Update();
-	mPacketHandler.Update();
+	mSocket->Update();
+	mPacketHandler->Update();
 	if (IsServerDown())
 	{
 		LOG("Server timed out, disconnecting.");
 		SendExitServer(std::vector<std::string>());
-	//	//Set the state to looking for servers
-	//	//Maybe display a server timed out message
+		//	//Set the state to looking for servers
+		//	//Maybe display a server timed out message
 		BroadcastForServers(std::vector<std::string>());
 	}
 }
@@ -129,7 +123,7 @@ void CBE::SendChatMessage(std::vector<std::string> &values)
 	}
 	PacketMessage* p = new PacketMessage();
 	strncpy_s(p->message, values[0].c_str(), MESSAGE_SIZE);
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketMessage));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketMessage));
 }
 
 void CBE::AppendColour(std::vector<std::string> &values)
@@ -138,27 +132,28 @@ void CBE::AppendColour(std::vector<std::string> &values)
 	{
 		values.push_back(" ");
 	}
+	return;									//Color is out of scope
 	std::string colour = "";
 	colour.append("[");
 	colour.append(std::to_string(mcurBG));
 	colour.append("][");
 	colour.append(std::to_string(mCurFG));
 	colour.append("]");
-	mChatBox = colour.append(mChatBox);
+	values[0] = colour.append(values[0]);
 }
 
 void CBE::BroadcastForServers(std::vector<std::string> &values)
 {
-	LOG("FUCK YOUR SHIT");
+	LOG("Broadcasting for servers");
 	PacketDetectServer* p = new PacketDetectServer();
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketDetectServer));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketDetectServer));
 }
 
 void CBE::SendExitRoom(std::vector<std::string> &values)
 {
 	PacketChangeRoomRequest* p = new PacketChangeRoomRequest();
 	strncpy_s(p->newRoomName, "Lobby", ROOM_NAME_SIZE);
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeRoomRequest));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeRoomRequest));
 }
 
 void CBE::SendExitServer(std::vector<std::string> &values)
@@ -170,7 +165,7 @@ void CBE::SendExitServer(std::vector<std::string> &values)
 
 bool CBE::IsServerDown()
 {
-	if(time(0) - mPacketHandler.GetLastPacketTime() < mKillTime)
+	if (time(0) - mPacketHandler->GetLastPacketTime() < mKillTime)
 	{
 		return true;
 	}
@@ -186,7 +181,7 @@ void CBE::RequestRoomChange(std::vector<std::string> &values)
 	}
 	PacketChangeRoomRequest* p = new PacketChangeRoomRequest();
 	strncpy_s(p->newRoomName, values[0].c_str(), ROOM_NAME_SIZE);
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeRoomRequest));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeRoomRequest));
 }
 
 void CBE::SendCreateRoom(std::vector<std::string> &values)
@@ -205,7 +200,7 @@ void CBE::SendCreateRoom(std::vector<std::string> &values)
 	{
 		strncpy_s(p->roomPassword, std::string("").c_str(), PASSWORD_SIZE);
 	}
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketCreateRoomRequest));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketCreateRoomRequest));
 }
 
 void CBE::SendSetName(std::vector<std::string> &values)
@@ -217,17 +212,19 @@ void CBE::SendSetName(std::vector<std::string> &values)
 	}
 	PacketChangeUserNameRequest* p = new PacketChangeUserNameRequest();
 	strncpy_s(p->newUserName, values[0].c_str(), USER_NAME_SIZE);
-	mSocket.Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeUserNameRequest));
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketChangeUserNameRequest));
 }
 
 void CBE::SetRooms(std::vector<std::string> rooms)
 {
 	mRooms = rooms;
+	mRenderer.SetContents("Rooms", mRooms);
 }
 
 void CBE::SetUsers(std::vector<std::string> users)
 {
 	mUsers = users;
+
 }
 
 void CBE::SetServersFound(std::vector<ServerInfo> serversFound)
@@ -239,7 +236,16 @@ void CBE::SetServerAddr(IPAddress addr)
 {
 	mServerAddr = addr;
 }
-void CBE::RecieveMessage(std::string message)
+void CBE::RecieveMessage(std::string username, std::string message)
 {
-	mRenderer.AddEntry("Chat Log", message);
+	username += ": " + message;
+	mRenderer.AddEntry("Chat Log", username);
+}
+
+void CBE::JoinServer(std::vector<std::string> &values)
+{
+	LOG("Attempting to connect to server");
+	ConnectToServerRequest*p = new ConnectToServerRequest();
+	strncpy_s(p->Username, values[0].c_str(), USER_NAME_SIZE);
+	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(ConnectToServerRequest));
 }
