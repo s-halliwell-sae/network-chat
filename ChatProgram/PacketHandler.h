@@ -48,6 +48,22 @@ public:
 	unsigned short GetPacketNumber();
 
 	std::vector<Pending*>* GetPendingAcks();
+	std::function<void(std::string, std::string)> GetClientMessageCallback()
+	{
+		return mClientMessageCallback;
+	}
+	void SetClientMessageCallback(std::function<void(std::string, std::string)> c)
+	{
+		mClientMessageCallback = c;
+	}
+	std::function<void(std::vector<std::string>)> GetClientUpdateRoomListCallback()
+	{
+		return mClientUpdateRoomListCallback;
+	}
+	void SetClientUpdateRoomListCallback(std::function<void(std::vector<std::string>)> c)
+	{
+		mClientUpdateRoomListCallback = c;
+	}
 private:
 	#pragma region PacketFunctions
 	void Acknowledge();
@@ -93,6 +109,9 @@ private:
 
 	// A map of all of the packet receive callback functions.
 	std::map<PacketType, std::function<void()>> mPacketReceiveCallbacks;
+
+	std::function<void(std::string, std::string)> mClientMessageCallback;
+	std::function<void(std::vector<std::string > users)> mClientUpdateRoomListCallback;
 
 	// Last packet recieved
 	time_t mLastPacketTime;

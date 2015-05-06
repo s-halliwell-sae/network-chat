@@ -18,7 +18,8 @@ class CBE
 public:
 	CBE();
 	~CBE();
-	
+
+	void JoinServer(std::vector<std::string> &values);
 	void BroadcastForServers(std::vector<std::string> &values);	//Broadcast a looking for server packet
 	void SendExitRoom(std::vector<std::string> &values);		//Exit the current room out to the lobby (if already in the lobby this will do nothing)
 	void SendExitServer(std::vector<std::string> &values);		//Safe disconnect from the server
@@ -38,7 +39,7 @@ public:
 	void SubmitTextBox();
 	void SubmitTextBox(std::string text);
 
-	void RecieveMessage(std::string message);
+	void RecieveMessage(std::string user, std::string message);
 
 	void SendChatMessage(std::vector<std::string> &values);
 	void Run();
@@ -52,8 +53,8 @@ private:
 
 	ChatParser mParser;							//The Chat Parser
 
-	SocketWrapper mSocket;						//The active Socket
-	PacketHandler mPacketHandler;				//The Packet Handler
+	SocketWrapper *mSocket;						//The active Socket
+	PacketHandler *mPacketHandler;				//The Packet Handler
 	IPAddress mServerAddr;						//The IPAddress of the server
 
 	float mKillTime = 5.0f;						//Amount of time that can pass before server times out

@@ -61,7 +61,11 @@ void Renderer::SetupLayout(GUILayout style)
 	//LOG("Pixel Res Y: " + std::to_string(windowY));
 
 	//Initialise TCOD window
+#ifdef NC_SERVER
+	TCODConsole::initRoot(resX, resY, "Server", false);
+#elif defined NC_CLIENT
 	TCODConsole::initRoot(resX, resY, "Client", false);
+#endif
 	int frameRate = 25;
 	IniManager::getInstance().GetInt("frameRate", frameRate);
 	TCODSystem::setFps(frameRate);
@@ -89,7 +93,7 @@ void Renderer::SetupLayout(GUILayout style)
 		TCODConsole::root->setDefaultBackground(GetColour("background"));
 
 		//Setup the GUI elements
-		mRenderables.push_back(new TextBox(int(resX * 0.15) * 2 - 1, 1, resX - int(resX * 0.15) * 2, int(resY * 0.8), 3, "Chat Log", "Callan: "));
+		mRenderables.push_back(new TextBox(int(resX * 0.15) * 2 - 1, 1, resX - int(resX * 0.15) * 2, int(resY * 0.8), 3, "Chat Log"));
 		mRenderables.push_back(new TextBox(int(resX * 0.15), 1, int(resX * 0.15), int(resY * 0.8), 2, "Users", "- "));
 		mRenderables.push_back(new TextBox(1, 1, int(resX * 0.15), int(resY * 0.8), 2, "Rooms", "- "));		
 		mDynamicField = new DynamicTextBox(1, int(resY * 0.8), resX - 2, int(resY * 0.2) - 1, "Input Field");

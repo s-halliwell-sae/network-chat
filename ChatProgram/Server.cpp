@@ -1,5 +1,6 @@
 #ifdef NC_SERVER
 
+#include "IniManager.h"
 #include "Server.h"
 #include "Logger.h"
 #include <Windows.h>
@@ -16,15 +17,22 @@ Server::Server(const string& name, unsigned short port)
 	
 	LOG("Constructing server: " + name + ".");
 
+	IniManager::getInstance().Init("Config/config.ini");
+	mRenderer.SetupLayout(Renderer::CLIENT_CONNECTED);
+
 	CreateRoom("Lobby", true);
 	mSocket.Bind();
+	mCurrRoom = GetRoom("Lobby");
+
+
+	UpdateRoomGUI();
 }
 
 int Server::run()
 {
 	mRunning = true;
 
-	while (mRunning)
+	while (mRunning && !TCODConsole::isWindowClosed())
 	{
 		if (mSocket.CheckForWaitingData())
 		{
@@ -43,11 +51,17 @@ int Server::run()
 					if (senderUser)
 					{
 						Room* senderRoom = senderUser->GetRoom();
-						if (senderRoom != GetRoom("Lobby"))
+						//if (senderRoom != GetRoom("Lobby"))
 						{
 							string logOut = senderUser->GetName() + " sent message: ";
 							logOut.append(ptm.message);
 							LOG(logOut);
+
+							if (mCurrRoom == senderRoom)
+							{
+								mCurrRoomChat.push_back(senderUser->GetName() + ": " + ptm.message);
+								UpdateChatGUI();
+							}
 
 							SendAcknowledge(senderIP, senderPort);
 							SendRoomMessage(*senderRoom, senderUser->GetName(), ptm.message);
@@ -90,8 +104,8 @@ int Server::run()
 							LOG(logOut);
 
 							MoveUser(senderUser, toRoom);
+							UpdateUserGUI();
 						}
-
 					}
 
 					break;
@@ -158,6 +172,8 @@ int Server::run()
 					{
 						CreateUser(ptcsr.Username, senderIP, senderPort);
 						SendUserList(*GetRoom("Lobby"));
+						SendRoomList();
+						UpdateUserGUI();
 					}
 					
 					break;
@@ -175,6 +191,14 @@ int Server::run()
 				mRooms[i]->SetLastContactTime(clock());
 			else if (!mRooms[i]->isIndestructible() && currTime - mRooms[i]->GetLastContactTime() > ROOM_TIMEOUT_MS)
 				DeleteRoom(mRooms[i]);
+		}
+
+		mRenderer.Update();
+
+		if (mRenderer.PressedEnter())
+		{
+			string message = mRenderer.RetrieveDynamicField();
+			ProcessCommand(message);
 		}
 
 		Sleep(UPDATE_RATE);
@@ -204,6 +228,8 @@ void Server::CreateRoom(const string& name, bool indestructible)
 	LOG(logOut);
 
 	mRooms.push_back(new Room(name, indestructible));
+
+	UpdateRoomGUI();
 }
 
 void Server::CreateUser(const string& name, const IPAddress& ip, unsigned short port)
@@ -216,6 +242,9 @@ void Server::CreateUser(const string& name, const IPAddress& ip, unsigned short 
 	newUser->SetIP(ip);
 	newUser->SetUserPort(port);
 	newUser->SetRoom(GetRoom("Lobby"));
+	
+	//Need to add users to room
+	GetRoom("Lobby")->AddUser(newUser);
 
 	mUsers.push_back(newUser);
 }
@@ -223,13 +252,16 @@ void Server::CreateUser(const string& name, const IPAddress& ip, unsigned short 
 void Server::DeleteRoom(Room* room)
 {
 	for (size_t i = 0; i < mRooms.size(); i++)
+	{
 		if (mRooms[i] == room)
 		{
-			cout << "DELETED: " << mRooms[i]->GetName() << endl;
+			cout << "Deleted Room: " << mRooms[i]->GetName() << endl;
 			mRooms.erase(mRooms.begin() + i);
 		}
+	}
 
 	SendRoomList();
+	UpdateRoomGUI();
 
 	delete room;
 }
@@ -255,6 +287,9 @@ void Server::MoveUser(User* user, Room* room)
 	lastRoom->RemoveUser(user);
 	user->SetRoom(room);
 	user->GetRoom()->AddUser(user);
+
+	//Need to add users to room
+	room->AddUser(user);
 
 	SendUserList(*lastRoom);
 	SendUserList(*room);
@@ -285,6 +320,14 @@ User* const Server::GetUser(const IPAddress& ip, unsigned short port) const
 			return mUsers[i];
 
 	return nullptr;
+}
+
+void Server::ChangeCurrentRoom(Room* room)
+{
+	mCurrRoomChat.clear();
+	mCurrRoom = room;
+	UpdateChatGUI();
+	UpdateUserGUI();
 }
 
 void Server::SendAcknowledge(const IPAddress& ip, unsigned short port) const
@@ -330,7 +373,6 @@ void Server::SendRoomMessage(/*const*/ Room& room, const string& user, const str
 
 	for (size_t i = 0; i < room.GetUsers().size(); ++i)
 	{
-		cout << room.GetUsers().size() << endl;
 		User* user = room.GetUsers()[i];
 		DefaultSend(packet_message, sizeof(PacketMessage), user->GetIP(), user->GetPort());
 	}
@@ -377,6 +419,82 @@ void Server::SendUserList(/* const */ Room& room) const
 void Server::DefaultSend(/* const */ ABPacket& packet, unsigned int size, const IPAddress& ip, unsigned short port) const
 {
 	mSocket.Send(ip, port, &packet, size);
+}
+
+void Server::UpdateChatGUI()
+{
+	mRenderer.SetContents("Chat Log", mCurrRoomChat);
+}
+
+void Server::UpdateRoomGUI()
+{
+	vector<string> rooms;
+
+	for (size_t i = 0; i < mRooms.size(); ++i)
+		rooms.push_back(mRooms[i]->GetName());
+
+	mRenderer.SetContents("Rooms", rooms);
+}
+
+void Server::UpdateUserGUI()
+{
+	vector<string> users;
+
+	for (size_t i = 0; i < mUsers.size(); ++i)
+		if (mUsers[i]->GetRoom() == mCurrRoom)
+			users.push_back(mUsers[i]->GetName());
+
+	mRenderer.SetContents("Users", users);
+}
+
+void Server::ProcessCommand(string cmd)
+{
+	if (cmd.substr(0, 1).compare("/") == 0)
+	{
+		int cmdEndPos = cmd.find(" ");
+
+		if (cmdEndPos != string::npos)
+		{
+			string command = cmd.substr(1, cmdEndPos - 1);
+			string text = cmd.substr(cmdEndPos + 1, cmd.length() - 1);
+
+			if (command.compare("joinroom") == 0)
+			{
+				if (GetRoom(text))
+				{
+					ChangeCurrentRoom(GetRoom(text));
+					UpdateChatGUI();
+					UpdateUserGUI();
+				}
+			}
+			else if (command.compare("createroom") == 0)
+			{
+				if (!GetRoom(text))
+				{
+					CreateRoom(text, false);
+					UpdateRoomGUI();
+					SendRoomList();
+				}
+			}
+		}
+		else
+		{
+			string command = cmd.substr(1, cmdEndPos - 1);
+
+			if (command.compare("leaveroom") == 0)
+			{
+				ChangeCurrentRoom(GetRoom("Lobby"));
+				UpdateChatGUI();
+				UpdateUserGUI();
+			}
+		}
+	}
+	else
+	{
+		SendRoomMessage(*mCurrRoom, "SERVER", cmd);
+		mCurrRoomChat.push_back("SERVER: " + cmd);
+		UpdateChatGUI();
+	}
 }
 
 Server::~Server()
