@@ -72,6 +72,15 @@ class Server
 
 	Room*		   mCurrRoom;
 	vector<string> mCurrRoomChat;
+
+	PacketHandler* m_handler;
+
+	void detectServer(void);
+	void message(void);
+	void changeRoom(void);
+	void changeName(void);
+	void createRoom(void);
+	void connect(void);
 };
 
 #endif

@@ -64,6 +64,7 @@ public:
 	{
 		mClientUpdateRoomListCallback = c;
 	}
+	ABPacket* mCurrentPacket;
 private:
 	#pragma region PacketFunctions
 	void Acknowledge();
@@ -93,7 +94,6 @@ private:
 
 	SocketWrapper* mSocket;
 
-	ABPacket* mCurrentPacket;
 	IPAddress mLatestAddress;
 
 	// Current packet number (loop around)

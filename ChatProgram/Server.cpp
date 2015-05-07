@@ -21,167 +21,186 @@ Server::Server(const string& name, unsigned short port)
 	mRenderer.SetupLayout(Renderer::CLIENT_CONNECTED);
 
 	CreateRoom("Lobby", true);
+	m_handler = new PacketHandler(&mSocket);
 	mSocket.Bind();
+
 	mCurrRoom = GetRoom("Lobby");
 
-
 	UpdateRoomGUI();
+}
+
+
+void Server::detectServer(void)
+{
+
+	ABPacket ptm = *m_handler->mCurrentPacket;
+	std::cout << "det" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+
+	//SendAcknowledge(senderIP, senderPort);
+	SendServerInfo(senderIP, senderPort);
+}
+
+void Server::message(void)
+{
+	std::cout << "msg" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+
+	PacketMessage ptm = (PacketMessage&)m_handler->mCurrentPacket;
+
+	User* senderUser = GetUser(senderIP, senderPort);
+
+	if (senderUser)
+	{
+		Room* senderRoom = senderUser->GetRoom();
+		//if (senderRoom != GetRoom("Lobby"))
+		{
+			string logOut = senderUser->GetName() + " sent message: ";
+			logOut.append(ptm.message);
+			LOG(logOut);
+
+			if (mCurrRoom == senderRoom)
+			{
+				mCurrRoomChat.push_back(senderUser->GetName() + ": " + ptm.message);
+				UpdateChatGUI();
+			}
+
+			//SendAcknowledge(senderIP, senderPort);
+			SendRoomMessage(*senderRoom, senderUser->GetName(), ptm.message);
+		}
+	}
+}
+
+
+void Server::changeRoom(void)
+{
+	std::cout << "CHANGE ROOM" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+	User* senderUser = GetUser(senderIP, senderPort);
+
+	if (senderUser)
+	{
+		PacketChangeRoomRequest ptcrr = (PacketChangeRoomRequest&)m_handler->mCurrentPacket;
+		Room* toRoom = GetRoom(ptcrr.newRoomName);
+		PacketChangeRoom resp = PacketChangeRoom();
+
+		bool toRoomValid = toRoom != nullptr;
+
+		if (toRoomValid)
+			strncpy_s(resp.newRoomName, 32, toRoom->GetName().c_str(), 32);
+		else
+			strncpy_s(resp.newRoomName, 32, "-1", 32);
+
+		//SendAcknowledge(senderIP, senderPort);
+		SendChangeRoomResponse(resp, senderIP, senderPort);
+
+		if (toRoomValid)
+		{
+			string logOut = senderUser->GetName() + " moved to: ";
+			logOut.append(toRoom->GetName());
+			LOG(logOut);
+
+			MoveUser(senderUser, toRoom);
+			UpdateUserGUI();
+		}
+	}
+}
+
+void Server::changeName(void)
+{
+	std::cout << "change name" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+	PacketChangeUserNameRequest ptcunr = (PacketChangeUserNameRequest&)m_handler->mCurrentPacket;
+
+	User* user = GetUser(ptcunr.newUserName);
+	PacketChangeUserName packet_change_name;
+
+	if (user)
+	{
+		memcpy(packet_change_name.newUserName, user->GetName().c_str(), 32);
+	}
+	else
+	{
+		string logOut = "Name changed: ";
+		logOut.append(GetUser(senderIP, senderPort)->GetName());
+		logOut += " -> ";
+		logOut.append(ptcunr.newUserName);
+		LOG(logOut);
+
+		GetUser(senderIP, senderPort)->SetName(ptcunr.newUserName);
+		memcpy(packet_change_name.newUserName, ptcunr.newUserName, 32);
+	}
+
+	//SendAcknowledge(senderIP, senderPort);
+	SendChangeUserNameResponse(packet_change_name, senderIP, senderPort);
+
+	if (!user)
+		SendUserList(*GetUser(senderIP, senderPort)->GetRoom());
+
+}
+
+
+void Server::createRoom(void)
+{
+
+	std::cout << "create room" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+	PacketCreateRoomRequest ptcrr = (PacketCreateRoomRequest&)m_handler->mCurrentPacket;
+	PacketCreateRoomResponse resp;
+	resp.wasCreated = GetRoom(ptcrr.newRoomName) == nullptr;
+
+	//SendAcknowledge(senderIP, senderPort);
+	SendCreateRoomResponse(resp, senderIP, senderPort);
+
+	if (resp.wasCreated)
+	{
+		CreateRoom(ptcrr.newRoomName, false);
+		SendRoomList();
+	}
+}
+
+void Server::connect(void)
+{
+	std::cout << "CONNECT" << std::endl;
+	IPAddress senderIP(mSocket.getSenderIP());
+	unsigned short senderPort = mSocket.getSenderPort();
+	ConnectToServerRequest ptcsr = (ConnectToServerRequest&)m_handler->mCurrentPacket;
+	ConnectToServerResponce resp;
+
+	resp.isAccepted = GetUser(ptcsr.Username) == nullptr;
+
+	//SendAcknowledge(senderIP, senderPort);
+	SendConnectServerResponse(resp, senderIP, senderPort);
+
+	if (resp.isAccepted)
+	{
+		CreateUser(ptcsr.Username, senderIP, senderPort);
+		SendUserList(*GetRoom("Lobby"));
+		SendRoomList();
+		UpdateUserGUI();
+	}
 }
 
 int Server::run()
 {
 	mRunning = true;
+	m_handler->AssignAsServer();
+	m_handler->AddFunctionToMap(std::bind(&Server::detectServer, this), PT_DETECT_SERVER);
+	m_handler->AddFunctionToMap(std::bind(&Server::changeRoom, this), PT_CHANGE_ROOM_REQUEST);
+	m_handler->AddFunctionToMap(std::bind(&Server::message, this), PT_MESSAGE);
+	m_handler->AddFunctionToMap(std::bind(&Server::changeName, this), PT_CHANGE_USER_NAME_REQUEST);
+	m_handler->AddFunctionToMap(std::bind(&Server::createRoom, this), PT_CREATE_ROOM_REQUEST);
+	m_handler->AddFunctionToMap(std::bind(&Server::connect, this), PT_CONNECT_TO_SERVER_REQUEST);
 
 	while (mRunning && !TCODConsole::isWindowClosed())
 	{
-		if (mSocket.CheckForWaitingData())
-		{
-			ABPacket& packet = *mSocket.getLatestPacket();
-
-			IPAddress senderIP(mSocket.getSenderIP());
-			unsigned short senderPort = mSocket.getSenderPort();
-
-			switch (packet.mPacketType)
-			{
-				case PT_MESSAGE:
-				{
-					PacketMessage ptm = (PacketMessage&) packet;
-					User* senderUser = GetUser(senderIP, senderPort);
-
-					if (senderUser)
-					{
-						Room* senderRoom = senderUser->GetRoom();
-						//if (senderRoom != GetRoom("Lobby"))
-						{
-							string logOut = senderUser->GetName() + " sent message: ";
-							logOut.append(ptm.message);
-							LOG(logOut);
-
-							if (mCurrRoom == senderRoom)
-							{
-								mCurrRoomChat.push_back(senderUser->GetName() + ": " + ptm.message);
-								UpdateChatGUI();
-							}
-
-							SendAcknowledge(senderIP, senderPort);
-							SendRoomMessage(*senderRoom, senderUser->GetName(), ptm.message);
-						}
-					}
-
-					break;
-				}
-				case PT_DETECT_SERVER:
-				{
-					SendAcknowledge(senderIP, senderPort);
-					SendServerInfo(senderIP, senderPort);
-
-					break;
-				}
-				case PT_CHANGE_ROOM_REQUEST:
-				{
-					User* senderUser = GetUser(senderIP, senderPort);
-					
-					if (senderUser)
-					{					
-						PacketChangeRoomRequest ptcrr = (PacketChangeRoomRequest&) packet;
-						Room* toRoom = GetRoom(ptcrr.newRoomName);
-						PacketChangeRoom resp = PacketChangeRoom();
-						
-						bool toRoomValid = toRoom != nullptr;
-
-						if (toRoomValid)
-							strncpy_s(resp.newRoomName, 32, toRoom->GetName().c_str(), 32);
-						else
-							strncpy_s(resp.newRoomName, 32, "-1", 32);
-
-						SendAcknowledge(senderIP, senderPort);
-						SendChangeRoomResponse(resp, senderIP, senderPort);
-
-						if (toRoomValid)
-						{
-							string logOut = senderUser->GetName() + " moved to: ";
-							logOut.append(toRoom->GetName());
-							LOG(logOut);
-
-							MoveUser(senderUser, toRoom);
-							UpdateUserGUI();
-						}
-					}
-
-					break;
-				}
-				case PT_CHANGE_USER_NAME_REQUEST:
-				{
-					PacketChangeUserNameRequest ptcunr = (PacketChangeUserNameRequest&) packet;
-
-					User* user = GetUser(ptcunr.newUserName);
-					PacketChangeUserName packet_change_name;
-
-					if (user)
-					{
-						memcpy(packet_change_name.newUserName, user->GetName().c_str(), 32);
-					}
-					else
-					{
-						string logOut = "Name changed: ";
-						logOut.append(GetUser(senderIP, senderPort)->GetName());
-						logOut += " -> ";
-						logOut.append(ptcunr.newUserName);
-						LOG(logOut);
-
-						GetUser(senderIP, senderPort)->SetName(ptcunr.newUserName);
-						memcpy(packet_change_name.newUserName, ptcunr.newUserName, 32);	
-					}
-
-					SendAcknowledge(senderIP, senderPort);
-					SendChangeUserNameResponse(packet_change_name, senderIP, senderPort);
-
-					if (!user)
-						SendUserList(*GetUser(senderIP, senderPort)->GetRoom());
-
-					break;
-				}
-				case PT_CREATE_ROOM_REQUEST:
-				{
-					PacketCreateRoomRequest ptcrr = (PacketCreateRoomRequest&) packet;
-					PacketCreateRoomResponse resp;
-					resp.wasCreated = GetRoom(ptcrr.newRoomName) == nullptr;
-
-					SendAcknowledge(senderIP, senderPort);
-					SendCreateRoomResponse(resp, senderIP, senderPort);
-
-					if (resp.wasCreated)
-					{
-						CreateRoom(ptcrr.newRoomName, false);
-						SendRoomList();
-					}
-
-					break;
-				}
-				case PT_CONNECT_TO_SERVER_REQUEST:
-				{
-					ConnectToServerRequest ptcsr = (ConnectToServerRequest&) packet;
-					ConnectToServerResponce resp;
-
-					resp.isAccepted = GetUser(ptcsr.Username) == nullptr;
-
-					SendAcknowledge(senderIP, senderPort);
-					SendConnectServerResponse(resp, senderIP, senderPort);
-
-					if (resp.isAccepted)
-					{
-						CreateUser(ptcsr.Username, senderIP, senderPort);
-						SendUserList(*GetRoom("Lobby"));
-						SendRoomList();
-						UpdateUserGUI();
-					}
-					
-					break;
-				}
-				default:
-					break;
-			}
-		}
+		mSocket.Update();
+		m_handler->Update();
 
 		clock_t currTime = clock();
 
