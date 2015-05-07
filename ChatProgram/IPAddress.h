@@ -9,8 +9,8 @@ class IPAddress
 public:
 	// ctors
 	IPAddress();
-	IPAddress(unsigned long IPAddr);
-	IPAddress(const char * IPAddr);
+	IPAddress(unsigned long IPAddr, unsigned short port);
+	IPAddress(const char * IPAddr, unsigned short port);
 	// dtor
 	~IPAddress();
 	// setters
@@ -19,6 +19,7 @@ public:
 
 	// getters
 	unsigned long GetIPAddress()  const;
+	unsigned short GetPort()  const;
 
 	
 	friend std::ostream& operator<< (std::ostream& o, const IPAddress& ip)
@@ -37,6 +38,7 @@ public:
 	bool compare(const IPAddress& other);
 
 private:
+	unsigned short mPort;
 	unsigned long mIPAddress;
 };
 

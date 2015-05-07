@@ -40,9 +40,10 @@ CBE::CBE()
 	fp = std::bind(&CBE::AppendColour, this, std::placeholders::_1);
 	mParser.GetCommandManager()->AddFunction(mAppendCommand, fp);
 
-	SetServerAddr(IPAddress("127.0.0.1"));
+	SetServerAddr(IPAddress("127.0.0.1", 40000));
 
-	mSocket = new SocketWrapper(mServerAddr, 40000);
+	mSocket = new SocketWrapper(mServerAddr);
+
 	mPacketHandler = new PacketHandler(mSocket);
 	mPacketHandler->AssignAsClient();
 
@@ -101,7 +102,7 @@ void CBE::Update()
 		SendExitServer(std::vector<std::string>());
 		//	//Set the state to looking for servers
 		//	//Maybe display a server timed out message
-		BroadcastForServers(std::vector<std::string>());
+	//	BroadcastForServers(std::vector<std::string>());
 	}
 }
 
@@ -145,8 +146,8 @@ void CBE::AppendColour(std::vector<std::string> &values)
 void CBE::BroadcastForServers(std::vector<std::string> &values)
 {
 	LOG("Broadcasting for servers");
-	PacketDetectServer* p = new PacketDetectServer();
-	mSocket->Send(mServerAddr, (ABPacket*)p, sizeof(PacketDetectServer));
+//	PacketDetectServer* p = new PacketDetectServer();
+//	mSocket->Broadcast();//Send(mServerAddr, (ABPacket*)p, sizeof(PacketDetectServer));
 }
 
 void CBE::SendExitRoom(std::vector<std::string> &values)
@@ -165,9 +166,9 @@ void CBE::SendExitServer(std::vector<std::string> &values)
 
 bool CBE::IsServerDown()
 {
-	if (time(0) - mPacketHandler->GetLastPacketTime() < mKillTime)
+	if (time(0) - mPacketHandler->GetLastPacketTime() > mKillTime)
 	{
-		return true;
+	//	return true;
 	}
 	return false;
 }

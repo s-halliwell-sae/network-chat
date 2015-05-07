@@ -7,6 +7,7 @@ PacketHandler::PacketHandler(SocketWrapper* sock)
 {
 	mSocket = sock;
 	mSocket->SetHandler(this);
+	mLastPacketTime = time(0);
 }
 
 PacketHandler::PacketHandler()
@@ -94,15 +95,22 @@ void PacketHandler::PushPacket(ABPacket* pack)
 {
 	// Temporarily save the current packet
 	mCurrentPacket = pack;
-	
-	// Find the relvant function based on current packets type
-	std::function<void()> f = mPacketReceiveCallbacks.at(mCurrentPacket->mPacketType);
-	// Call the function.
-	f();
-	if (pack->mPacketType != PT_ACKNOWLEDGE)
+
+	if (mPacketReceiveCallbacks.find(mCurrentPacket->mPacketType) != mPacketReceiveCallbacks.end())
 	{
-//		std::cout << "Packet Number in PushPacket: " << pack->mPacketNumber << '\n';
-		SendAck();
+		// Find the relvant function based on current packets type
+		std::function<void()> f = mPacketReceiveCallbacks.at(mCurrentPacket->mPacketType);
+		// Call the function.
+		f();
+		if (pack->mPacketType != PT_ACKNOWLEDGE)
+		{
+			//		std::cout << "Packet Number in PushPacket: " << pack->mPacketNumber << '\n';
+			SendAck();
+		}
+	}
+	else
+	{
+		std::cout << "Packettype: " << pack->mPacketType << " not supported\n";
 	}
 }
 // Bind functions to the map externally
@@ -214,7 +222,7 @@ void PacketHandler::Acknowledge()
 {
 //	std::cout << "Rec ACK PK num: " << mCurrentPacket->mPacketNumber << '\n';
 	PacketAcknowledge* pk = (PacketAcknowledge*)mCurrentPacket;
-//	std::cout << "Ack recieved: " << pk->mPacketNumber << std::endl;
+	std::cout << "Ack recieved: " << pk->mPacketNumber << std::endl;
 
 //	std::cout << "mPendingAcks.size(): " << mPendingAcks.size() << '\n';
 

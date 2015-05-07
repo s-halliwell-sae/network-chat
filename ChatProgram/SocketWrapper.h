@@ -18,6 +18,7 @@ public:
 	// ctors
 	SocketWrapper();
 	SocketWrapper(IPAddress addr, unsigned short port);
+	SocketWrapper(IPAddress addr);
 	// dtor
 	~SocketWrapper();
 
@@ -44,6 +45,11 @@ public:
 	bool CheckForWaitingData();
 	void SendToHandler();
 	void PopWaitingData();
+	
+	IPAddress GetClientData()
+	{
+		return mClientData;
+	}
 
 	ABPacket* getLatestPacket();
 	unsigned short getSenderPort();
@@ -57,6 +63,8 @@ private:
 	ABPacket* mLatestSent;
 	ABPacket* mLatestRecieved;
 	PacketHandler* mHandler;
+
+	IPAddress mClientData;
 
 	// Data that is relevant to the WINSOCK socket setup process and dealing with
 	// incoming and outgoing packets

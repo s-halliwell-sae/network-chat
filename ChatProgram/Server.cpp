@@ -10,7 +10,7 @@ using std::endl;
 
 Server::Server(const string& name, unsigned short port) 
 	: mRunning(false), 
-	  mSocket(*new SocketWrapper(IPAddress("127.0.0.1"), port))
+	  mSocket(*new SocketWrapper())
 {
 	mName = name;
 	mPort = port;
@@ -35,17 +35,16 @@ void Server::detectServer(void)
 
 	ABPacket ptm = *m_handler->mCurrentPacket;
 	std::cout << "det" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
-	unsigned short senderPort = mSocket.getSenderPort();
+	IPAddress senderIP(mSocket.GetClientData());
 
 	//SendAcknowledge(senderIP, senderPort);
-	SendServerInfo(senderIP, senderPort);
+	SendServerInfo(senderIP, senderIP.GetPort());
 }
 
 void Server::message(void)
 {
 	std::cout << "msg" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
+	IPAddress senderIP(mSocket.GetClientData());
 	unsigned short senderPort = mSocket.getSenderPort();
 
 	PacketMessage ptm = (PacketMessage&)m_handler->mCurrentPacket;
@@ -77,9 +76,8 @@ void Server::message(void)
 void Server::changeRoom(void)
 {
 	std::cout << "CHANGE ROOM" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
-	unsigned short senderPort = mSocket.getSenderPort();
-	User* senderUser = GetUser(senderIP, senderPort);
+	IPAddress senderIP(mSocket.GetClientData());
+	User* senderUser = GetUser(senderIP, senderIP.GetPort());
 
 	if (senderUser)
 	{
@@ -95,7 +93,7 @@ void Server::changeRoom(void)
 			strncpy_s(resp.newRoomName, 32, "-1", 32);
 
 		//SendAcknowledge(senderIP, senderPort);
-		SendChangeRoomResponse(resp, senderIP, senderPort);
+		SendChangeRoomResponse(resp, senderIP, senderIP.GetPort());
 
 		if (toRoomValid)
 		{
@@ -112,8 +110,7 @@ void Server::changeRoom(void)
 void Server::changeName(void)
 {
 	std::cout << "change name" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
-	unsigned short senderPort = mSocket.getSenderPort();
+	IPAddress senderIP(mSocket.GetClientData());
 	PacketChangeUserNameRequest ptcunr = (PacketChangeUserNameRequest&)m_handler->mCurrentPacket;
 
 	User* user = GetUser(ptcunr.newUserName);
@@ -126,20 +123,20 @@ void Server::changeName(void)
 	else
 	{
 		string logOut = "Name changed: ";
-		logOut.append(GetUser(senderIP, senderPort)->GetName());
+		logOut.append(GetUser(senderIP, senderIP.GetPort())->GetName());
 		logOut += " -> ";
 		logOut.append(ptcunr.newUserName);
 		LOG(logOut);
 
-		GetUser(senderIP, senderPort)->SetName(ptcunr.newUserName);
+		GetUser(senderIP, senderIP.GetPort())->SetName(ptcunr.newUserName);
 		memcpy(packet_change_name.newUserName, ptcunr.newUserName, 32);
 	}
 
 	//SendAcknowledge(senderIP, senderPort);
-	SendChangeUserNameResponse(packet_change_name, senderIP, senderPort);
+	SendChangeUserNameResponse(packet_change_name, senderIP, senderIP.GetPort());
 
 	if (!user)
-		SendUserList(*GetUser(senderIP, senderPort)->GetRoom());
+		SendUserList(*GetUser(senderIP, senderIP.GetPort())->GetRoom());
 
 }
 
@@ -148,14 +145,13 @@ void Server::createRoom(void)
 {
 
 	std::cout << "create room" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
-	unsigned short senderPort = mSocket.getSenderPort();
+	IPAddress senderIP(mSocket.GetClientData());
 	PacketCreateRoomRequest ptcrr = (PacketCreateRoomRequest&)m_handler->mCurrentPacket;
 	PacketCreateRoomResponse resp;
 	resp.wasCreated = GetRoom(ptcrr.newRoomName) == nullptr;
 
 	//SendAcknowledge(senderIP, senderPort);
-	SendCreateRoomResponse(resp, senderIP, senderPort);
+	SendCreateRoomResponse(resp, senderIP, senderIP.GetPort());
 
 	if (resp.wasCreated)
 	{
@@ -167,19 +163,19 @@ void Server::createRoom(void)
 void Server::connect(void)
 {
 	std::cout << "CONNECT" << std::endl;
-	IPAddress senderIP(mSocket.getSenderIP());
-	unsigned short senderPort = mSocket.getSenderPort();
+	IPAddress senderIP(mSocket.GetClientData());
+	std::cout << senderIP << '\n';
 	ConnectToServerRequest ptcsr = (ConnectToServerRequest&)m_handler->mCurrentPacket;
 	ConnectToServerResponce resp;
 
 	resp.isAccepted = GetUser(ptcsr.Username) == nullptr;
 
 	//SendAcknowledge(senderIP, senderPort);
-	SendConnectServerResponse(resp, senderIP, senderPort);
+	SendConnectServerResponse(resp, senderIP, senderIP.GetPort());
 
 	if (resp.isAccepted)
 	{
-		CreateUser(ptcsr.Username, senderIP, senderPort);
+		CreateUser(ptcsr.Username, senderIP, senderIP.GetPort());
 		SendUserList(*GetRoom("Lobby"));
 		SendRoomList();
 		UpdateUserGUI();
@@ -196,6 +192,8 @@ int Server::run()
 	m_handler->AddFunctionToMap(std::bind(&Server::changeName, this), PT_CHANGE_USER_NAME_REQUEST);
 	m_handler->AddFunctionToMap(std::bind(&Server::createRoom, this), PT_CREATE_ROOM_REQUEST);
 	m_handler->AddFunctionToMap(std::bind(&Server::connect, this), PT_CONNECT_TO_SERVER_REQUEST);
+
+	m_handler->SetPacketNumber(0);
 
 	while (mRunning && !TCODConsole::isWindowClosed())
 	{
@@ -413,7 +411,7 @@ void Server::SendRoomList() const
 	for (size_t i = 0; i < lobby->GetUsers().size(); ++i)
 	{
 		User* user = lobby->GetUsers()[i];
-		mSocket.Send(user->GetIP(), user->GetPort(), (ABPacket*) &packet_room_list, sizeof(PacketRoomList));
+		mSocket.Send(user->GetIP(), user->GetPort(), (ABPacket*)&packet_room_list, sizeof(PacketRoomList));
 	}
 }
 
@@ -427,16 +425,17 @@ void Server::SendUserList(/* const */ Room& room) const
 	PacketUserList user_room_list;
 
 	strncpy_s(user_room_list.roomList, 8192, user_list_string.c_str(), 8192);
-	
+
 	for (size_t i = 0; i < room.GetUsers().size(); ++i)
 	{
 		User* user = room.GetUsers()[i];
-		mSocket.Send(user->GetIP(), user->GetPort(), (ABPacket*) &user_room_list, sizeof(PacketUserList));
+		mSocket.Send(user->GetIP(), user->GetPort(), (ABPacket*)&user_room_list, sizeof(PacketUserList));
 	}
 }
 
 void Server::DefaultSend(/* const */ ABPacket& packet, unsigned int size, const IPAddress& ip, unsigned short port) const
 {
+	std::cout << "DEFAULTSEND\n";
 	mSocket.Send(ip, port, &packet, size);
 }
 

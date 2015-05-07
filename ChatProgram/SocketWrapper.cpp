@@ -7,7 +7,6 @@
 // ctor
 SocketWrapper::SocketWrapper()
 {
-	mPort = 1234;
 	mIPAddress = INADDR_ANY;
 	Init();
 }
@@ -15,8 +14,15 @@ SocketWrapper::SocketWrapper()
 // ctor
 SocketWrapper::SocketWrapper(IPAddress addr, unsigned short port)
 {
-	mPort = port;
+	mPort = htons(port);
 	mIPAddress = addr.GetIPAddress();
+	Init();
+}
+
+SocketWrapper::SocketWrapper(IPAddress addr)
+{
+	mIPAddress = addr.GetIPAddress();
+	mPort = addr.GetPort();
 	Init();
 }
 // dtor
@@ -61,7 +67,7 @@ void SocketWrapper::Init()
 	//Prepare the sockaddr_in structure
 	mAddress.sin_family = AF_INET;
 	mAddress.sin_addr.s_addr = mIPAddress;
-	mAddress.sin_port = htons(mPort);
+	mAddress.sin_port = mPort;
 
 	mRecvLength = sizeof(mSourceAddress);
 }
@@ -88,13 +94,14 @@ void SocketWrapper::Recieve()
 
 	int recv = 0;
 
+
 	if ((recv = recvfrom(mSocket, buffer, BUFFER_SIZE, 0, (struct sockaddr*) &mSourceAddress, &mRecvLength)) == SOCKET_ERROR)
 	{
 		// If there's an error print it (we'll probably also want to log it)
 		std::cout << "recvfrom() failed: Error " << WSAGetLastError() << std::endl;
 	}
 	mLatestRecieved = (ABPacket*)buffer;
-//	std::cout << "mLatestRecieved: " << mLatestRecieved->mPacketNumber << '\n';
+	std::cout << "PacketRec " << mLatestRecieved->mPacketNumber << "\n";
 }
 
 void SocketWrapper::Resend(IPAddress addr, ABPacket *packet, size_t size)
@@ -102,7 +109,7 @@ void SocketWrapper::Resend(IPAddress addr, ABPacket *packet, size_t size)
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(mPort);
+	address.sin_port = mPort;
 
 	//std::cout << "pn: " << packet->mPacketNumber << " pn2: " << mHandler->GetPacketNumber() << std::endl;
 	mLatestSent = packet;
@@ -123,9 +130,7 @@ void SocketWrapper::Send(IPAddress addr, ABPacket *packet, size_t size)
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(mPort);
-
-
+	address.sin_port = mPort;
 
 	if (packet->mPacketType != PT_ACKNOWLEDGE)
 	{
@@ -158,13 +163,25 @@ void SocketWrapper::Send(IPAddress addr, unsigned short port, ABPacket *packet, 
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = addr.GetIPAddress();
-	address.sin_port = htons(port);
+	address.sin_port = port;
 
+	if (packet->mPacketType != PT_ACKNOWLEDGE)
+	{
+		packet->mPacketNumber = mHandler->GetPacketNumber();
+		packet->mPacketNumber++;
+
+		mHandler->SetPacketNumber(packet->mPacketNumber);
+
+		mHandler->PushPending(addr, packet, size);
+	}
+
+	//std::cout << "pn: " << packet->mPacketNumber << " pn2: " << mHandler->GetPacketNumber() << std::endl;
+	mLatestSent = packet;
+
+	// Set the contents of the packet
 	char* buffer = new char[size];
 	memset(buffer, '\0', size);
-
 	memcpy(buffer, packet, size);
-
 	// Send the packet
 	if (sendto(mSocket, buffer, size, 0, (struct sockaddr *) &address, mRecvLength) == SOCKET_ERROR)
 	{
@@ -178,8 +195,8 @@ void SocketWrapper::Broadcast()
 {
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = IPAddress("255.255.255.255").GetIPAddress();
-	address.sin_port = htons(mPort);
+	address.sin_addr.s_addr = IPAddress("255.255.255.255", 40000).GetIPAddress();
+	address.sin_port = IPAddress("255.255.255.255", 40000).GetPort();
 
 	PacketDetectServer* pds = new PacketDetectServer();
 
@@ -187,8 +204,8 @@ void SocketWrapper::Broadcast()
 
 	packet->mPacketNumber = 0;
 
+	std::cout << "Send BC\n";
 	mHandler->SetPacketNumber(packet->mPacketNumber);
-	//std::cout << "Sending: " << packet->mPacketType << '\n';
 
 	size_t size = sizeof(PacketDetectServer);
 
@@ -250,7 +267,7 @@ ABPacket* SocketWrapper::getLatestPacket()
 
 unsigned short SocketWrapper::getSenderPort()
 {
-	return ntohs(mSourceAddress.sin_port);
+	return (mSourceAddress.sin_port);
 }
 
 unsigned long SocketWrapper::getSenderIP()
